@@ -1,22 +1,17 @@
-import Link from "next/link";
 import { developers } from "@/data/developers";
+import DeveloperCard from "@/app/components/DeveloperCard";
 
 export default function DevelopersPage() {
     return (
-        <div>
-            <h1>Developers</h1>
-            <p>Meet the developers in our community.</p>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-2">Developers</h1>
+            <p className="text-gray-600 mb-6">Meet the developers in our community.</p>
 
-            <ul>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {developers.map((dev) => (
-                    <li key={dev.username}>
-                        <Link href={`/developers/${dev.username}`}>
-                            {dev.username}
-                        </Link>
-                        <p>{dev.role}</p>
-                    </li>
+                    <DeveloperCard key={dev.username} {...dev} />
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }
