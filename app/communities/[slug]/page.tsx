@@ -1,12 +1,13 @@
 import { communities } from "@/data/communities";
 import { notFound } from "next/navigation";
 
-export default function CommunityPage({
+export default async function CommunityPage({
     params,
 }: {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }) {
-    const community = communities.find((c) => c.slug === params.slug);
+    const { slug } = await params;
+    const community = communities.find((c) => c.slug === slug);
 
     if (!community) {
         notFound();

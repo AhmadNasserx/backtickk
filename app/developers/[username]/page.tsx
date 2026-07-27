@@ -1,12 +1,13 @@
 import { developers } from "@/data/developers";
 import { notFound } from "next/navigation";
 
-export default function DeveloperPage({
+export default async function DeveloperPage({
     params,
 }: {
-    params: { username: string };
+    params: Promise<{ username: string }>;
 }) {
-    const developer = developers.find((d) => d.username === params.username);
+    const { username } = await params;
+    const developer = developers.find((d) => d.username === username);
 
     if (!developer) {
         notFound();
