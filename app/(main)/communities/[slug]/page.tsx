@@ -1,5 +1,6 @@
 import { communities } from "@/data/communities";
 import { notFound } from "next/navigation";
+import JoinButton from "@/app/components/JoinButton";
 
 export default async function CommunityPage({
     params,
@@ -17,6 +18,7 @@ export default async function CommunityPage({
         <div>
             <h1>{community.name}</h1>
             <p>{community.description}</p>
+            <JoinButton />
         </div>
     );
 }
