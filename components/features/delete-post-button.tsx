@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { NETWORK_ERROR, readApiFailure } from "@/components/features/client-api";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
+import { TrashIcon } from "@/components/ui/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -48,9 +49,10 @@ export function DeletePostButton({ postId, redirectTo, className }: DeletePostBu
       <Button
         variant="ghost"
         size="sm"
-        className={cn("text-danger hover:text-danger", className)}
+        className={cn("text-danger hover:bg-danger/10 hover:text-danger", className)}
         onClick={() => setConfirming(true)}
       >
+        <TrashIcon className="size-4" />
         Delete post
       </Button>
     );

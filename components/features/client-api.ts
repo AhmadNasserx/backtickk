@@ -44,3 +44,42 @@ export function signInHref(): string {
   const current = `${window.location.pathname}${window.location.search}`;
   return `/signin?callbackUrl=${encodeURIComponent(current)}`;
 }
+
+// Module-level cache: one `/api/me/communities` request serves every join button on the page. Sign-in and sign-out
+// are full navigations, so the cache never outlives the viewer it was loaded for.
+let myCommunityIds: Promise<Set<string>> | null = null;
+
+/**
+ * Ids of the communities the signed-in viewer has joined. A 401 means nobody is signed in, so the set is empty.
+ * A failed request is not cached, so the next caller retries.
+ */
+export function getMyCommunityIds(): Promise<Set<string>> {
+  if (!myCommunityIds) {
+    const request: Promise<Set<string>> = fetch("/api/me/communities").then(async (response) => {
+      if (response.status === 401) return new Set<string>();
+      if (!response.ok) throw new Error("Could not load memberships");
+      const body: unknown = await response.json();
+      const ids = isRecord(body) && Array.isArray(body.ids) ? body.ids : [];
+      return new Set(ids.filter((id): id is string => typeof id === "string"));
+    });
+    myCommunityIds = request;
+    // Drop a failed request so the next button mount retries; the rejection still reaches this caller.
+    request.catch(() => {
+      if (myCommunityIds === request) myCommunityIds = null;
+    });
+  }
+  return myCommunityIds;
+}
+
+/** Records a join or leave once the server has answered, so buttons mounted later read the new state. */
+export function setMyCommunityMembership(communityId: string, member: boolean): void {
+  if (!myCommunityIds) return;
+  myCommunityIds
+    .then((ids) => {
+      if (member) ids.add(communityId);
+      else ids.delete(communityId);
+    })
+    .catch(() => {
+      // A failed load is retried by the next caller, so there is nothing to update.
+    });
+}

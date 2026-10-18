@@ -1,6 +1,6 @@
 // Imported only by client forms (post and profile), so it inherits their client boundary and needs no directive.
 import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
-import { CloseIcon } from "@/components/ui/icons";
+import { XIcon } from "@/components/ui/icons";
 
 export interface TagInputProps {
   id: string;
@@ -11,6 +11,8 @@ export interface TagInputProps {
   placeholder?: string;
   /** Applied to each entry before it is added, e.g. lowercasing for post tags. */
   normalize?: (raw: string) => string;
+  /** Drawn before each chip, e.g. "#" for post tags. Display only; the stored value has no prefix. */
+  chipPrefix?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean | "true" | "false";
 }
@@ -37,6 +39,7 @@ export function TagInput({
   max,
   placeholder,
   normalize = keepAsTyped,
+  chipPrefix,
   "aria-describedby": describedBy,
   "aria-invalid": ariaInvalid,
 }: TagInputProps) {
@@ -83,21 +86,26 @@ export function TagInput({
   return (
     <div
       onClick={() => inputRef.current?.focus()}
-      className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-2 py-1.5 transition-colors hover:border-subtle focus-within:ring-2 focus-within:ring-brand has-[[aria-invalid=true]]:border-danger"
+      className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-2 py-1.5 transition-colors hover:border-line-strong focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40 has-[[aria-invalid=true]]:border-danger"
     >
       {value.map((tag, index) => (
         <span
           key={tag}
-          className="inline-flex items-center gap-1 rounded-md bg-brand/15 py-0.5 pr-1 pl-2 text-xs font-medium text-fg ring-1 ring-brand/40 ring-inset"
+          className="inline-flex items-center gap-0.5 rounded-md border border-line bg-surface-3 py-0.5 pr-0.5 pl-2 font-mono text-xs text-fg"
         >
+          {chipPrefix ? (
+            <span aria-hidden="true" className="text-accent">
+              {chipPrefix}
+            </span>
+          ) : null}
           {tag}
           <button
             type="button"
             onClick={() => remove(index)}
             aria-label={`Remove ${tag}`}
-            className="rounded p-0.5 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
+            className="inline-flex size-8 items-center justify-center rounded text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none sm:size-6"
           >
-            <CloseIcon className="size-3" />
+            <XIcon className="size-3.5" />
           </button>
         </span>
       ))}
@@ -114,7 +122,7 @@ export function TagInput({
         autoComplete="off"
         aria-describedby={describedBy}
         aria-invalid={ariaInvalid}
-        className="h-7 min-w-24 flex-1 bg-transparent px-1 text-sm text-fg outline-none placeholder:text-subtle disabled:cursor-not-allowed"
+        className="h-8 min-w-24 flex-1 bg-transparent px-1 text-sm text-fg outline-none placeholder:text-subtle disabled:cursor-not-allowed"
       />
     </div>
   );

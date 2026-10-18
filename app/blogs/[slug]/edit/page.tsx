@@ -45,10 +45,11 @@ export default async function EditPostPage({ params }: { params: Promise<{ slug:
     : [...joined, post.community].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Edit post</h1>
-        <p className="mt-1 text-sm text-muted">Only the fields you change are saved.</p>
+    <div className="mx-auto flex max-w-3xl flex-col gap-8">
+      <header className="flex flex-col gap-2">
+        <p className="eyebrow">Editing</p>
+        <h1 className="font-display text-3xl leading-tight text-fg sm:text-4xl">Edit post</h1>
+        <p className="text-muted">Only the fields you change are saved.</p>
       </header>
 
       <PostForm

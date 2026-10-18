@@ -24,14 +24,17 @@ export default async function CommunitiesPage({ searchParams }: { searchParams: 
   const hasFilters = Boolean(query.search || query.topic);
 
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-fg">Communities</h1>
-        <p className="text-muted">Find developer communities by technology and join the ones you follow.</p>
+    <div className="flex flex-col gap-10">
+      <header className="flex flex-col gap-3">
+        <p className="eyebrow">Directory</p>
+        <h1 className="font-display text-5xl leading-none tracking-tight text-fg sm:text-6xl">Communities</h1>
+        <p className="max-w-xl text-base leading-7 text-muted">
+          Find developer communities by technology, then join the ones you want to follow.
+        </p>
       </header>
 
-      <div className="flex flex-col gap-4">
-        <SearchBar label="Search communities" placeholder="Search by name or description" />
+      <section aria-label="Find communities" className="flex flex-col gap-5">
+        <SearchBar label="Search communities" placeholder="Search by name or description" className="max-w-xl" />
         <TopicChips
           topics={topics}
           activeTopic={query.topic}
@@ -39,7 +42,12 @@ export default async function CommunitiesPage({ searchParams }: { searchParams: 
           searchParams={{ search: query.search }}
           label="Filter communities by topic"
         />
-      </div>
+      </section>
+
+      <p aria-live="polite" className="font-mono text-xs tracking-wide text-subtle uppercase">
+        {result.total} {result.total === 1 ? "community" : "communities"}
+        {hasFilters ? " found" : ""}
+      </p>
 
       {result.items.length === 0 ? (
         <EmptyState
@@ -51,17 +59,17 @@ export default async function CommunitiesPage({ searchParams }: { searchParams: 
           }
           action={
             hasFilters ? (
-              <Link href="/communities" className="text-sm font-medium text-brand hover:underline">
+              <Link href="/communities" className="text-sm font-medium text-accent underline-offset-4 hover:underline">
                 Clear filters
               </Link>
             ) : null
           }
         />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {result.items.map((community) => (
-            <li key={community.id}>
-              <CommunityCard community={community} className="h-full" />
+            <li key={community.id} className="flex min-w-0">
+              <CommunityCard community={community} className="w-full" />
             </li>
           ))}
         </ul>

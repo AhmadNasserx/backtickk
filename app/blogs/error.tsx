@@ -18,8 +18,9 @@ export default function BlogsError({
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight text-fg">Posts could not load</h1>
-      <p className="text-muted">Something went wrong while loading posts. Try again in a moment.</p>
+      <p className="eyebrow">Error</p>
+      <h1 className="font-display text-4xl leading-tight text-fg">Posts could not load</h1>
+      <p className="text-pretty text-muted">Something went wrong while loading posts. Try again in a moment.</p>
       {error.digest ? <p className="font-mono text-xs text-subtle">Reference: {error.digest}</p> : null}
       <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
         <button type="button" onClick={() => unstable_retry()} className={buttonClasses("primary", "md")}>

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { NETWORK_ERROR, readApiFailure, signInHref } from "@/components/features/client-api";
-import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { BookmarkIcon } from "@/components/ui/icons";
 import { Spinner } from "@/components/ui/spinner";
@@ -91,23 +90,30 @@ export function BookmarkButton({ postId, className }: BookmarkButtonProps) {
 
   const busy = !ready || pending;
 
+  // A toggle keeps one label; aria-pressed carries the state.
   return (
-    <div className={cn("flex flex-col items-start gap-2", className)}>
-      <Button
-        variant="secondary"
-        size="sm"
+    <div className={cn("flex flex-col items-end gap-1.5", className)}>
+      <button
+        type="button"
+        aria-label="Bookmark post"
         aria-pressed={isBookmarked}
+        title={isBookmarked ? "Remove bookmark" : "Save to bookmarks"}
         disabled={busy}
         onClick={toggle}
+        className={cn(
+          "inline-flex size-11 items-center justify-center rounded-xl border transition-colors disabled:cursor-wait sm:size-10",
+          isBookmarked
+            ? "border-accent/50 bg-accent-soft text-accent hover:border-accent"
+            : "border-line bg-surface-2 text-muted hover:border-line-strong hover:text-fg",
+        )}
       >
         {busy ? (
           <Spinner size="sm" label={ready ? "Updating bookmark" : "Loading bookmark"} />
         ) : (
-          <BookmarkIcon className={cn("size-4", isBookmarked && "text-brand")} fill={isBookmarked ? "currentColor" : "none"} />
+          <BookmarkIcon className="size-4" fill={isBookmarked ? "currentColor" : "none"} />
         )}
-        {isBookmarked ? "Bookmarked" : "Bookmark"}
-      </Button>
-      <FormError message={error} />
+      </button>
+      <FormError message={error} className="max-w-xs px-2 py-1 text-xs" />
     </div>
   );
 }

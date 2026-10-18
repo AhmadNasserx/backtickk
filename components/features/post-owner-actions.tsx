@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { DeletePostButton } from "@/components/features/delete-post-button";
 import { buttonClasses } from "@/components/ui/button";
+import { EditIcon } from "@/components/ui/icons";
 
 export type PostOwnerActionsProps = {
   postId: string;
@@ -23,6 +24,7 @@ export function PostOwnerActions({ postId, slug, authorId }: PostOwnerActionsPro
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Link href={`/blogs/${slug}/edit`} className={buttonClasses("secondary", "sm")}>
+        <EditIcon className="size-4" />
         Edit
       </Link>
       <DeletePostButton postId={postId} redirectTo="/blogs" />

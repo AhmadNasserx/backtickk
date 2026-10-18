@@ -55,7 +55,13 @@ interface PostValues {
 type EditorTab = "write" | "preview";
 
 const EXCERPT_MAX = 240;
+const CONTENT_MAX = 20000;
 const MAX_TAGS = 5;
+
+const STATUS_OPTIONS: { value: PostStatus; label: string; hint: string }[] = [
+  { value: "draft", label: "Draft", hint: "Only you" },
+  { value: "published", label: "Published", hint: "Everyone" },
+];
 
 const TAB_IDS: Record<EditorTab, { tab: string; panel: string }> = {
   write: { tab: "post-content-tab-write", panel: "post-content-panel-write" },
@@ -114,6 +120,8 @@ export function PostForm(props: PostFormProps) {
     props.mode === "edit" ? valuesFromInitial(props.initial) : emptyValues(),
   );
   const [tab, setTab] = useState<EditorTab>("write");
+  // The cover field is optional, so it starts collapsed unless the post already has a cover or it has an error.
+  const [coverOpen, setCoverOpen] = useState(() => props.mode === "edit" && Boolean(props.initial.coverImage));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -132,6 +140,8 @@ export function PostForm(props: PostFormProps) {
   function showErrors(next: FieldErrors) {
     setErrors(next);
     if (next.content) setTab("write");
+    // The cover field sits in a collapsed disclosure, so open it or its error cannot be focused.
+    if (next.coverImage) setCoverOpen(true);
     if (Object.keys(next).length > 0) setInvalidAttempt((n) => n + 1);
   }
 
@@ -210,14 +220,23 @@ export function PostForm(props: PostFormProps) {
   const cancelHref = props.mode === "edit" ? `/blogs/${props.initial.slug}` : "/dashboard";
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
       <FormError message={formError} />
 
-      <Field id="post-title" label="Title" error={errors.title} hint="5-120 characters.">
+      {/* Title reads as the page's headline: a large display-font field with no visible box. The label stays for screen readers. */}
+      <Field
+        id="post-title"
+        label="Title"
+        error={errors.title}
+        hint="5-120 characters."
+        className="[&>label]:sr-only"
+      >
         <Input
           value={values.title}
           onChange={(event) => setField("title", event.target.value)}
+          placeholder="Give your post a title"
           autoComplete="off"
+          className="h-auto border-transparent bg-transparent px-0 py-1 font-display text-4xl leading-tight text-fg placeholder:text-subtle hover:border-transparent sm:text-5xl"
         />
       </Field>
 
@@ -234,8 +253,8 @@ export function PostForm(props: PostFormProps) {
         />
       </Field>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Field id="post-community" label="Community" error={errors.communityId}>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <Field id="post-community" label="Community" error={errors.communityId} className="min-w-0">
           <Select value={values.communityId} onChange={(event) => setField("communityId", event.target.value)}>
             <option value="">Choose a community</option>
             {communities.map((community) => (
@@ -246,15 +265,33 @@ export function PostForm(props: PostFormProps) {
           </Select>
         </Field>
 
-        <Field id="post-status" label="Status" error={errors.status}>
-          <Select
-            value={values.status}
-            onChange={(event) => setField("status", event.target.value === "draft" ? "draft" : "published")}
-          >
-            <option value="published">Published: visible to everyone</option>
-            <option value="draft">Draft: only you can see it</option>
-          </Select>
-        </Field>
+        <fieldset className="flex min-w-0 flex-col gap-1.5">
+          <legend className="mb-1.5 text-sm font-medium text-fg">Status</legend>
+          <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-surface-2 p-1">
+            {STATUS_OPTIONS.map((option) => (
+              <label key={option.value} className="relative cursor-pointer">
+                <input
+                  type="radio"
+                  name="post-status"
+                  value={option.value}
+                  checked={values.status === option.value}
+                  onChange={() => setField("status", option.value)}
+                  aria-describedby={errors.status ? "post-status-error" : undefined}
+                  className="peer sr-only"
+                />
+                <span className="flex h-10 flex-col items-center justify-center rounded-lg text-sm font-medium text-muted transition-colors hover:text-fg peer-checked:bg-surface-3 peer-checked:text-fg peer-checked:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
+                  {option.label}
+                  <span className="font-mono text-[10px] tracking-wide text-muted uppercase">{option.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          {errors.status ? (
+            <p id="post-status-error" className="text-sm text-danger">
+              {errors.status}
+            </p>
+          ) : null}
+        </fieldset>
       </div>
 
       <Field
@@ -269,35 +306,52 @@ export function PostForm(props: PostFormProps) {
           onChange={(tags) => setField("tags", tags)}
           max={MAX_TAGS}
           normalize={toLowerTag}
+          chipPrefix="#"
           placeholder="e.g. react, nextjs"
         />
       </Field>
 
-      <Field
-        id="post-cover"
-        label="Cover image URL (optional)"
-        hint="Starts with https:// or http://"
-        error={errors.coverImage}
+      <details
+        open={coverOpen}
+        onToggle={(event) => setCoverOpen(event.currentTarget.open)}
+        className="group rounded-xl border border-line bg-surface"
       >
-        <Input
-          type="url"
-          inputMode="url"
-          value={values.coverImage}
-          onChange={(event) => setField("coverImage", event.target.value)}
-          placeholder="https://"
-          autoComplete="off"
-        />
-      </Field>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium text-fg transition-colors hover:text-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+          <span>
+            Cover image <span className="font-normal text-subtle">(optional)</span>
+          </span>
+          <span aria-hidden="true" className="font-mono text-lg leading-none text-subtle transition-transform group-open:rotate-45">
+            +
+          </span>
+        </summary>
+        <div className="px-4 pb-4">
+          <Field
+            id="post-cover"
+            label="Cover image URL"
+            hint="Starts with https:// or http://"
+            error={errors.coverImage}
+          >
+            <Input
+              type="url"
+              inputMode="url"
+              value={values.coverImage}
+              onChange={(event) => setField("coverImage", event.target.value)}
+              placeholder="https://"
+              autoComplete="off"
+            />
+          </Field>
+        </div>
+      </details>
 
       <section aria-labelledby="post-content-heading" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="post-content-heading" className="text-sm font-medium text-fg">
+          <h2 id="post-content-heading" className="eyebrow">
             Content
           </h2>
           <div
             role="tablist"
             aria-label="Editor view"
-            className="inline-flex rounded-lg border border-line bg-surface-2 p-0.5"
+            className="inline-flex rounded-xl border border-line bg-surface-2 p-1"
           >
             <EditorTabButton
               ref={writeTabRef}
@@ -324,18 +378,20 @@ export function PostForm(props: PostFormProps) {
           aria-labelledby={TAB_IDS.write.tab}
           hidden={tab !== "write"}
           tabIndex={0}
+          className="focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none rounded-xl"
         >
           <Field
             id="post-content"
             label="Markdown"
-            hint="Raw HTML is not rendered."
+            hint={`${values.content.length}/${CONTENT_MAX} characters. Raw HTML is not rendered.`}
             error={errors.content}
+            className="[&>label]:sr-only"
           >
             <Textarea
               value={values.content}
               onChange={(event) => setField("content", event.target.value)}
               rows={16}
-              className="font-mono text-sm"
+              className="min-h-[50vh] font-mono text-sm leading-relaxed"
               spellCheck
             />
           </Field>
@@ -347,7 +403,7 @@ export function PostForm(props: PostFormProps) {
           aria-labelledby={TAB_IDS.preview.tab}
           hidden={tab !== "preview"}
           tabIndex={0}
-          className="min-h-64 rounded-lg border border-line bg-surface px-5 py-4"
+          className="min-h-[50vh] rounded-xl border border-line bg-surface px-5 py-4 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none sm:px-8 sm:py-6"
         >
           {values.content.trim() ? (
             <div className="prose-dev">
@@ -359,11 +415,15 @@ export function PostForm(props: PostFormProps) {
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-end">
-        <Link href={cancelHref} className={buttonClasses("secondary", "md")}>
+      {/*
+        Mobile: a sticky bar that sits above the fixed bottom tab bar (4.25rem tall plus the safe area).
+        Desktop: the same buttons sit inline at the end of the form.
+      */}
+      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+4.25rem)] z-10 -mx-4 flex gap-3 border-t border-line bg-bg/90 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-bg/75 lg:static lg:mx-0 lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+        <Link href={cancelHref} className={buttonClasses("secondary", "md", "flex-1 lg:flex-none")}>
           Cancel
         </Link>
-        <Button type="submit" disabled={submitting} aria-busy={submitting}>
+        <Button type="submit" disabled={submitting} aria-busy={submitting} className="flex-1 lg:flex-none">
           {submitting ? <Spinner size="sm" label="Saving" /> : null}
           {submitting ? "Saving..." : submitLabel}
         </Button>
@@ -395,8 +455,8 @@ function EditorTabButton({ tabKey, label, selected, onSelect, onKeyDown, ref }: 
       onClick={onSelect}
       onKeyDown={onKeyDown}
       className={cn(
-        "h-8 rounded-md px-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none",
-        selected ? "bg-surface text-fg shadow-sm" : "text-muted hover:text-fg",
+        "h-8 rounded-lg px-3.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none",
+        selected ? "bg-surface-3 text-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)]" : "text-muted hover:text-fg",
       )}
     >
       {label}

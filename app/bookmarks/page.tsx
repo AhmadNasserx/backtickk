@@ -1,4 +1,5 @@
 // Dynamic: depends on the signed-in user. Their saved posts are read per request, never cached.
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PostCard } from "@/components/features/post-card";
@@ -24,10 +25,13 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Bo
   const result = await listBookmarks(user.id, query);
 
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Bookmarks</h1>
-        <p className="mt-1 text-sm text-muted">Posts you saved to read later.</p>
+    <div className="flex flex-col gap-8">
+      <header className="reveal flex flex-col gap-2" style={{ "--i": 0 } as CSSProperties}>
+        <p className="eyebrow">
+          {result.total === 1 ? "1 saved post" : `${result.total} saved posts`}
+        </p>
+        <h1 className="font-display text-4xl leading-tight text-fg sm:text-5xl">Bookmarks</h1>
+        <p className="text-muted">Posts you saved to read later.</p>
       </header>
 
       {result.total === 0 ? (
@@ -55,8 +59,8 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Bo
         <>
           <ul className="flex flex-col gap-3">
             {result.items.map((post) => (
-              <li key={post.id}>
-                <PostCard post={post} />
+              <li key={post.id} className="cv-auto">
+                <PostCard post={post} variant="compact" />
               </li>
             ))}
           </ul>

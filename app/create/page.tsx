@@ -17,12 +17,11 @@ export default async function CreatePostPage() {
   const communities = await listUserCommunities(user.id);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Write a post</h1>
-        <p className="mt-1 text-sm text-muted">
-          Share what you learned. Posts appear in the community you choose.
-        </p>
+    <div className="mx-auto flex max-w-3xl flex-col gap-8">
+      <header className="flex flex-col gap-2">
+        <p className="eyebrow">New post</p>
+        <h1 className="font-display text-3xl leading-tight text-fg sm:text-4xl">Write a post</h1>
+        <p className="text-muted">Share what you learned. Posts appear in the community you choose.</p>
       </header>
 
       {communities.length === 0 ? (

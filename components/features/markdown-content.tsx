@@ -37,7 +37,8 @@ function MarkdownImage({ src, alt }: ComponentPropsWithoutRef<"img">) {
       width={1200}
       height={675}
       unoptimized
-      className="h-auto w-full rounded-lg border border-line"
+      sizes="(min-width: 768px) 44rem, 100vw"
+      className="h-auto w-full rounded-xl border border-line"
     />
   );
 }
