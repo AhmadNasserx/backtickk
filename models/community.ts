@@ -36,7 +36,7 @@ const communitySchema = new Schema<CommunityAttributes>(
 );
 
 communitySchema.index({ slug: 1 }, { unique: true });
-communitySchema.index({ name: 1 });
+communitySchema.index({ memberCount: -1, name: 1 });
 
 export const Community: Model<CommunityAttributes> =
   (models.Community as Model<CommunityAttributes> | undefined) ?? model<CommunityAttributes>('Community', communitySchema);
