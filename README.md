@@ -156,7 +156,7 @@ Server Components call services directly, with no HTTP hop. Services return DTOs
 
 **Direction.** "Ink & Lime": a warm near-black canvas, one acid-lime accent, Instrument Serif headlines, Geist body text and Geist Mono for tags and metadata. Tokens live in `app/globals.css` (`@theme`), so every colour, radius and font is a Tailwind utility (`bg-surface`, `text-muted`, `bg-accent`, `font-display`).
 
-**Navigation.** A sticky top bar with a command-style search (`/` or Ctrl/Cmd+K) on desktop. On mobile, a compact top bar with a search button that opens a full-width search overlay, plus a fixed bottom tab bar. Touch targets are at least 44px. The layout was checked with no horizontal overflow at 360, 390, 768 and 1360px.
+**Navigation.** A sticky top bar with a command-style search (`/` or Ctrl/Cmd+K) on desktop. On mobile, a compact top bar with a search button that opens a full-width search overlay, plus a fixed bottom tab bar. Primary controls (the bottom tab bar, buttons and form fields) are about 44px or larger; secondary text links and tag chips are smaller. The layout was checked with no horizontal overflow at 360, 390, 768 and 1360px.
 
 **Brand logos.** Community and technology marks are the real SVG logos from [simple-icons](https://simpleicons.org) (CC0), bundled as path data in `data/tech-logos.ts` and rendered by `components/ui/tech-logo.tsx`. There is no runtime dependency and no image request. A community stores a logo slug in its `icon` field. Unknown values fall back to the first letter of the community name, never to emoji. Marks whose brand colour is too dark for the dark theme (Next.js, Rust, GitHub) switch to the foreground colour.
 
