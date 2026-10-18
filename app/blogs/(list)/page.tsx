@@ -111,7 +111,7 @@ export default async function BlogsPage({ searchParams }: { searchParams: Search
             {result.total} {result.total === 1 ? "post" : "posts"}
             {result.totalPages > 1 ? ` · page ${result.page} of ${result.totalPages}` : null}
           </p>
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ul data-reveal-stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {result.items.map((post, index) => (
               // Cards below the first screenfuls skip layout and paint until they scroll near.
               <li key={post.id} className={cn("min-w-0", index >= 4 && "cv-auto")}>

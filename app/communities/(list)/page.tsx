@@ -66,7 +66,7 @@ export default async function CommunitiesPage({ searchParams }: { searchParams: 
           }
         />
       ) : (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul data-reveal-stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {result.items.map((community) => (
             <li key={community.id} className="flex min-w-0">
               <CommunityCard community={community} className="w-full" />
