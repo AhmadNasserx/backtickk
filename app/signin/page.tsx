@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FormError } from "@/components/ui/form-error";
+import { Wordmark } from "@/components/ui/logo";
 import { SignInButtons } from "@/components/forms/signin-buttons";
 import { getCurrentUser } from "@/lib/auth-helpers";
 
@@ -80,9 +81,10 @@ export default async function SignInPage({ searchParams }: { searchParams: SignI
         <div className="grid grid-cols-1 gap-10 p-6 sm:p-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14 lg:p-14">
           <div className="flex min-w-0 flex-col gap-8">
             <div className="flex flex-col gap-5">
+              <Wordmark className="self-start" />
               <p className="eyebrow">Get started</p>
               <h1 className="font-display text-5xl leading-[1.02] tracking-tight text-balance text-fg sm:text-6xl">
-                Where developers <em className="italic text-accent">learn</em> out loud.
+                Where developers <em className="italic text-accent">write</em> in the open.
               </h1>
               <p className="max-w-md text-base leading-relaxed text-muted">
                 Communities, technical blogs and honest discussion about the tools you use every day.
@@ -100,7 +102,7 @@ export default async function SignInPage({ searchParams }: { searchParams: SignI
           </div>
 
           <div className="min-w-0 rounded-2xl border border-line bg-bg/80 p-6 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] backdrop-blur sm:p-8">
-            <h2 className="font-display text-3xl tracking-tight text-fg">Sign in to DevCommunity</h2>
+            <h2 className="font-display text-3xl tracking-tight text-fg">Sign in to Backtick</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               Use the GitHub or Google account you already have. No password is needed.
             </p>

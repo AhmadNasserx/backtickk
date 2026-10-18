@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { TopBar } from "@/components/layout/top-bar";
 import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
+import { Wordmark } from "@/components/ui/logo";
 
 // Server Component: no request-time data (the session is read in the client UserMenu), so the shell adds nothing to a page's rendering mode.
 export function AppShell({ children }: { children: ReactNode }) {
@@ -27,7 +28,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Bottom padding clears the fixed mobile tab bar; desktop has no bar. */}
         <footer className="border-t border-line pb-20 lg:pb-0">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-5 font-mono text-xs text-subtle sm:px-6 lg:px-8">
-            <p>© {new Date().getFullYear()} DevCommunity</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Wordmark />
+              <p>© {new Date().getFullYear()} Backtick</p>
+            </div>
             <Link
               href="/about"
               className="rounded text-muted transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

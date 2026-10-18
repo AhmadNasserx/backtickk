@@ -6,6 +6,7 @@ import { MobileSearch } from "@/components/layout/mobile-search";
 import { UserMenu } from "@/components/layout/user-menu";
 import { buttonClasses } from "@/components/ui/button";
 import { PenLineIcon } from "@/components/ui/icons";
+import { Wordmark } from "@/components/ui/logo";
 
 const NAV_LINK =
   "rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -17,17 +18,10 @@ export function TopBar() {
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          aria-label="Backtick home"
+          className="flex shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         >
-          <span
-            aria-hidden="true"
-            className="grid size-7 place-items-center rounded-md bg-accent font-mono text-[11px] leading-none font-bold text-accent-fg"
-          >
-            {">_"}
-          </span>
-          <span className="font-display text-lg leading-none tracking-tight text-fg sm:text-xl">
-            <span className="italic text-accent">Dev</span>Community
-          </span>
+          <Wordmark />
         </Link>
 
         <nav aria-label="Primary" className="hidden lg:block">

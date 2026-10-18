@@ -25,9 +25,9 @@ const monoFont = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-const SITE_NAME = "DevCommunity";
+const SITE_NAME = "Backtick";
 const SITE_DESCRIPTION =
-  "DevCommunity is a home for developer communities, technical blogs and discussions about the tools you use every day.";
+  "Backtick is where developers join communities, publish technical posts and discover what to learn next.";
 
 // Must not call auth(), cookies() or headers() here: that would make every route dynamic and defeat ISR.
 export const metadata: Metadata = {
