@@ -105,7 +105,7 @@ export async function upsertOAuthUser(profile: OAuthProfileInput): Promise<Sessi
         if (promoteToAdmin && existing.role !== 'admin') set.role = 'admin';
 
         const updated = Object.keys(set).length
-          ? await User.findByIdAndUpdate(existing._id, { $set: set }, { new: true }).lean<UserRow>()
+          ? await User.findByIdAndUpdate(existing._id, { $set: set }, { returnDocument: 'after' }).lean<UserRow>()
           : existing;
         return toSessionUser(updated ?? existing);
       }
@@ -170,7 +170,7 @@ export async function updateProfile(user: SessionUser, input: UpdateProfileInput
     const updated = await User.findByIdAndUpdate(
       user.id,
       { $set: { name: input.name, username: input.username, bio: input.bio, skills: input.skills } },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     ).lean<LeanFullUser>();
     if (!updated) {
       throw notFound('User not found');

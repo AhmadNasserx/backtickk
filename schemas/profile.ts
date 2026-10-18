@@ -24,10 +24,13 @@ export const usernameSchema = z
 
 const skillSchema = z.string().trim().min(1, 'Skills cannot be empty').max(30, 'Each skill is at most 30 characters');
 
-/** Drops case-insensitive duplicates while keeping the first spelling. */
-function dedupeSkills(skills: string[]): string[] {
+/*
+ * Skills are trimmed and de-duplicated (case-insensitively) before the item rules and the max-count
+ * check run, so the limit counts distinct skills. The first spelling is kept.
+ */
+function trimAndDedupeSkills(skills: string[]): string[] {
   const seen = new Set<string>();
-  return skills.filter((skill) => {
+  return skills.map((skill) => skill.trim()).filter((skill) => {
     const key = skill.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
@@ -40,9 +43,9 @@ export const updateProfileSchema = z.object({
   username: usernameSchema,
   bio: z.string().trim().max(280, 'Bio is at most 280 characters').default(''),
   skills: z
-    .array(skillSchema)
-    .max(15, 'At most 15 skills')
-    .transform(dedupeSkills)
+    .array(z.string())
+    .transform(trimAndDedupeSkills)
+    .pipe(z.array(skillSchema).max(15, 'At most 15 skills'))
     .default([]),
 });
 

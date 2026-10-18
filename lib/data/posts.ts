@@ -196,7 +196,8 @@ export async function updatePost(user: SessionUser, id: string, input: UpdatePos
     if (!(await Community.exists({ _id: communityId }))) {
       throw notFound('Community not found');
     }
-    if (!(await isMember(user.id, communityId))) {
+    // Same rule as createPost: the post's author, not the editor, must belong to the target community.
+    if (!(await isMember(existing.author.toString(), communityId))) {
       throw forbidden('Join this community before moving the post into it');
     }
     set.community = communityId;

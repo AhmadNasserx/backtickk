@@ -118,7 +118,7 @@ export async function joinCommunity(user: SessionUser, communityId: string): Pro
     return readMembershipState(user.id, communityId);
   }
 
-  const updated = await Community.findByIdAndUpdate(communityId, { $inc: { memberCount: 1 } }, { new: true })
+  const updated = await Community.findByIdAndUpdate(communityId, { $inc: { memberCount: 1 } }, { returnDocument: 'after' })
     .select('memberCount')
     .lean<{ memberCount: number }>();
   return { member: true, memberCount: updated?.memberCount ?? 0 };
