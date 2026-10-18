@@ -128,6 +128,23 @@ Server Components call services directly, with no HTTP hop. Services return DTOs
 6. The handler calls `revalidatePath` for the pages that show the post and returns the DTO.
 7. The client navigates to the post and calls `router.refresh()`.
 
+## Design system, logos and motion
+
+**Direction.** "Ink & Lime": a warm near-black canvas, one acid-lime accent, Instrument Serif headlines, Geist body text and Geist Mono for tags and metadata. Tokens live in `app/globals.css` (`@theme`), so every colour, radius and font is a Tailwind utility (`bg-surface`, `text-muted`, `bg-accent`, `font-display`).
+
+**Navigation.** A sticky top bar with a command-style search (`/` or Ctrl/Cmd+K) on desktop, and a compact top bar plus a fixed bottom tab bar on mobile. Touch targets are at least 44px and the layout was checked with no horizontal overflow at 360, 390, 768 and 1360px.
+
+**Brand logos.** Community and technology marks are the real SVG logos from [simple-icons](https://simpleicons.org) (CC0), bundled as path data in `data/tech-logos.ts` and rendered by `components/ui/tech-logo.tsx`. There is no runtime dependency and no image request. A community stores a logo slug in its `icon` field; unknown values fall back to a monogram, never to emoji. Marks whose brand colour is too dark for the dark theme (Next.js, Rust, GitHub) switch to the foreground colour.
+
+**Motion.** CSS-first, animating only `transform` and `opacity`, with no animation library:
+- scroll-driven reveals with `animation-timeline: view()`, wrapped in `@supports` so unsupported browsers just show the content;
+- a cursor spotlight on cards from one delegated, rAF-throttled pointer listener (`components/motion/spotlight.tsx`);
+- a logo marquee, a count-up for the hero stats (server renders the final number, so there is no layout shift) and a short route fade (`app/template.tsx`);
+- every animation is disabled under `prefers-reduced-motion`.
+The hero text that determines Largest Contentful Paint is painted in the first frame; only subtle, non-hiding motion is applied to it.
+
+**Performance.** Fonts are self-hosted through `next/font` (latin subset, `display: swap`). Post covers are generated in CSS, so most cards cost no image request. GitHub and Google avatars go through `next/image`. Joined-community state for a whole list is fetched once (`GET /api/me/communities`) instead of once per card. Lighthouse on the production build (local, simulated mobile): accessibility 100, best practices 100, SEO 100, performance 91 to 94 on the main pages, and a cumulative layout shift of about 0.001.
+
 ## Rendering strategy
 
 | Route | Strategy | Why |
@@ -233,10 +250,11 @@ All JSON endpoints return errors as `{ "error": { "message": "...", "details": .
 | `DELETE /api/communities/[id]/join` | Session | 200, `{ member: false, memberCount }` | 400, 401, 404 |
 | `GET /api/search?q=` | Public | 200, `{ posts, communities }` | 400 when `q` is missing or not 2 to 100 characters |
 | `GET /api/me` | Session | 200, `UserDTO` (includes the viewer's own email) | 401 |
+| `GET /api/me/communities` | Session | 200, `{ ids: string[] }` of joined community ids (one request serves every join button on a page) | 401 |
 | `PATCH /api/me` | Session | 200, `UserDTO` | 400, 401, 409 (username taken) |
 | `GET, POST /api/auth/*` | Auth.js | Sign-in, callback, session and sign-out endpoints | Managed by Auth.js |
 
-The bundled UI calls the write endpoints, the bookmark and membership endpoints, and `PATCH /api/me`. It does not call `GET /api/posts`, `GET /api/posts/[id]`, `GET /api/posts/[id]/comments`, `GET /api/communities`, `GET /api/search` or `GET /api/me`. Pages read those through the services on the server, so these endpoints form a JSON surface with no caller in this UI.
+The bundled UI calls the write endpoints, the bookmark endpoints, join and leave, `GET /api/me/communities` and `PATCH /api/me`. It does not call `GET /api/posts`, `GET /api/posts/[id]`, `GET /api/posts/[id]/comments`, `GET /api/communities`, `GET /api/search`, `GET /api/me` or `GET /api/communities/[id]/membership`. Pages read those through the services on the server, so these endpoints form a JSON surface with no caller in this UI.
 
 ## Authentication and authorization
 
