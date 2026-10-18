@@ -8,7 +8,11 @@ export function Textarea({ className, rows = 5, ...props }: TextareaProps) {
   return (
     <textarea
       rows={rows}
-      className={cn(CONTROL_BASE, "min-h-24 resize-y px-3 py-2 leading-6", className)}
+      className={cn(
+        CONTROL_BASE,
+        "min-h-24 resize-y px-3.5 py-2.5 leading-6 text-base sm:text-sm",
+        className,
+      )}
       {...props}
     />
   );

@@ -1,7 +1,9 @@
-type ClassValue = string | false | null | undefined;
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
+// twMerge resolves conflicting Tailwind utilities (later wins), e.g. cn("px-3", "px-4") -> "px-4".
 export function cn(...classes: ClassValue[]): string {
-  return classes.filter(Boolean).join(" ");
+  return twMerge(clsx(classes));
 }
 
 // UTC keeps server and browser output identical, so SSR and hydration never disagree.

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn, withParams } from "@/lib/utils";
-import { buttonClasses } from "@/components/ui/button";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icons";
 
 export type PaginationProps = {
   /** Current 1-based page. */
@@ -32,6 +32,18 @@ export function getPageItems(page: number, totalPages: number): PageItem[] {
   return items;
 }
 
+// Pills with 44px targets on mobile. Numerals are mono so the column of pages does not jitter.
+const NAV_BUTTON =
+  "inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-surface-2 px-4 text-sm font-medium text-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] transition-[color,background-color,border-color,transform] duration-200 ease-out hover:border-line-strong hover:bg-surface-3 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent max-sm:h-11 max-sm:px-4";
+
+const NAV_DISABLED = "pointer-events-none opacity-40 shadow-none";
+
+const PAGE_LINK =
+  "inline-flex h-10 min-w-10 items-center justify-center rounded-full px-3 font-mono text-sm tabular-nums text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent max-sm:h-11 max-sm:min-w-11";
+
+const PAGE_CURRENT =
+  "inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-accent px-3 font-mono text-sm font-medium tabular-nums text-accent-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)] max-sm:h-11 max-sm:min-w-11";
+
 export function Pagination({
   page,
   totalPages,
@@ -53,40 +65,35 @@ export function Pagination({
       className={cn("flex items-center justify-between gap-3", className)}
     >
       {hasPrev ? (
-        <Link rel="prev" href={hrefFor(page - 1)} className={buttonClasses("secondary", "sm")}>
+        <Link rel="prev" href={hrefFor(page - 1)} className={NAV_BUTTON}>
+          <ChevronLeftIcon className="size-4" />
           Previous
         </Link>
       ) : (
-        <span aria-disabled="true" className={buttonClasses("secondary", "sm", "opacity-50")}>
+        <span aria-disabled="true" className={cn(NAV_BUTTON, NAV_DISABLED)}>
+          <ChevronLeftIcon className="size-4" />
           Previous
         </span>
       )}
 
-      <p className="text-sm text-muted sm:hidden">
-        Page {page} of {totalPages}
+      <p className="font-mono text-sm tabular-nums text-muted sm:hidden">
+        {page} / {totalPages}
       </p>
 
       <ol className="hidden items-center gap-1 sm:flex">
         {getPageItems(page, totalPages).map((item, index) =>
           item === "ellipsis" ? (
-            <li key={`ellipsis-${index}`} aria-hidden="true" className="px-2 text-subtle">
+            <li key={`ellipsis-${index}`} aria-hidden="true" className="px-2 font-mono text-subtle">
               &hellip;
             </li>
           ) : (
             <li key={item}>
               {item === page ? (
-                <span
-                  aria-current="page"
-                  className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg bg-brand px-2 text-sm font-medium text-white"
-                >
+                <span aria-current="page" className={PAGE_CURRENT}>
                   {item}
                 </span>
               ) : (
-                <Link
-                  href={hrefFor(item)}
-                  aria-label={`Page ${item}`}
-                  className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm text-muted hover:bg-surface-2 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                >
+                <Link href={hrefFor(item)} aria-label={`Page ${item}`} className={PAGE_LINK}>
                   {item}
                 </Link>
               )}
@@ -96,12 +103,14 @@ export function Pagination({
       </ol>
 
       {hasNext ? (
-        <Link rel="next" href={hrefFor(page + 1)} className={buttonClasses("secondary", "sm")}>
+        <Link rel="next" href={hrefFor(page + 1)} className={NAV_BUTTON}>
           Next
+          <ChevronRightIcon className="size-4" />
         </Link>
       ) : (
-        <span aria-disabled="true" className={buttonClasses("secondary", "sm", "opacity-50")}>
+        <span aria-disabled="true" className={cn(NAV_BUTTON, NAV_DISABLED)}>
           Next
+          <ChevronRightIcon className="size-4" />
         </span>
       )}
     </nav>

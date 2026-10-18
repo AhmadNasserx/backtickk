@@ -1,12 +1,19 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export type CardProps = HTMLAttributes<HTMLDivElement>;
+export type CardProps = HTMLAttributes<HTMLDivElement> & {
+  /** Adds the lift + lime beam hover treatment (for clickable cards). */
+  interactive?: boolean;
+};
 
-export function Card({ className, ...props }: CardProps) {
+export function Card({ className, interactive = false, ...props }: CardProps) {
   return (
     <div
-      className={cn("rounded-xl border border-line bg-surface text-fg", className)}
+      className={cn(
+        "rounded-2xl border border-line bg-surface text-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)]",
+        interactive && "card-hover",
+        className,
+      )}
       {...props}
     />
   );
@@ -33,7 +40,7 @@ export type CardTitleProps = HTMLAttributes<HTMLHeadingElement> & {
 export function CardTitle({ as: Tag = "h2", className, ...props }: CardTitleProps) {
   return (
     <Tag
-      className={cn("text-base font-semibold tracking-tight", className)}
+      className={cn("text-base font-semibold tracking-tight text-fg", className)}
       {...props}
     />
   );

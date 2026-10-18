@@ -1,27 +1,43 @@
 @import "tailwindcss";
 
-/* Dark-only palette. Utilities such as bg-surface, border-line and text-muted are generated from these. */
+/*
+ * "Ink & Lime" design tokens. Dark-only; every color utility (bg-surface, border-line, text-muted,
+ * bg-accent-soft, text-danger/80 ...) is generated from these.
+ */
 @theme {
-  --color-bg: #0b0d12;
-  --color-surface: #11151c;
-  --color-surface-2: #171c26;
-  --color-line: #232a37;
-  --color-fg: #e7eaf0;
-  --color-muted: #98a2b3;
-  --color-subtle: #667085;
-  --color-brand: #5b6cff;
-  --color-brand-hover: #4a5af0;
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
+  --color-bg: #0a0a0b;
+  --color-surface: #111113;
+  --color-surface-2: #17171a;
+  --color-surface-3: #1e1e22;
+  --color-line: #26262b;
+  --color-line-strong: #3a3a42;
+  --color-fg: #f3f2ee;
+  --color-muted: #a3a3ab;
+  --color-subtle: #6f6f78;
+  --color-accent: #c8ff3d;
+  --color-accent-hover: #d8ff6b;
+  --color-accent-fg: #0a0a0b;
+  --color-accent-soft: color-mix(in srgb, #c8ff3d 12%, transparent);
+  --color-success: #4ade80;
+  --color-danger: #ff5d5d;
+  --color-warning: #ffb020;
+  --color-info: #7dd3fc;
+
+  /* Transitional aliases so not-yet-migrated markup keeps rendering. Remove once nothing uses them. */
+  --color-brand: #c8ff3d;
+  --color-brand-hover: #d8ff6b;
 }
 
+/*
+ * Font variables are set by next/font on <html> (see app/layout.tsx). They are named differently from
+ * the utility tokens on purpose: a variable named --font-sans cannot be mapped to itself.
+ */
 @theme inline {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* Base rules sit in a layer so utility classes can always override them. */
 @layer base {
   :root {
     color-scheme: dark;
@@ -31,6 +47,8 @@
     background-color: var(--color-bg);
     scroll-padding-top: 4rem;
     scroll-behavior: smooth;
+    scrollbar-color: var(--color-line-strong) var(--color-bg);
+    -webkit-text-size-adjust: 100%;
   }
 
   *,
@@ -45,20 +63,33 @@
     color: var(--color-fg);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-brand) 40%, transparent);
+    background-color: var(--color-accent);
+    color: var(--color-accent-fg);
   }
 
   :where(a, button, input, select, textarea, label) {
     transition-property: color, background-color, border-color, outline-color, box-shadow;
     transition-duration: 150ms;
-    transition-timing-function: ease;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
@@ -73,13 +104,232 @@
   }
 }
 
-/* Typography for rendered markdown (react-markdown). Plain CSS on the tokens above; no typography plugin. */
+@keyframes dc-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dc-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes dc-scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @layer components {
+  /* ---- Decorative backgrounds (use on an aria-hidden, pointer-events-none layer) ---- */
+
+  .bg-dots {
+    background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-glow {
+    pointer-events: none;
+    background-image: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-accent) 22%, transparent),
+      transparent
+    );
+  }
+
+  /* Noise is an inline SVG whose alpha is ~4% (feTurbulence red channel scaled into alpha). */
+  .bg-noise {
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.08 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Cards ---- */
+
+  /* Hover lift + lime beam along the top edge. Transform and opacity only; no layout work. */
+  .card-hover {
+    position: relative;
+    transition-property: border-color, transform;
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .card-hover::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 1.25rem;
+    right: 1.25rem;
+    height: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .card-hover:hover {
+      border-color: var(--color-line-strong);
+      transform: translateY(-2px);
+    }
+
+    .card-hover:hover::before {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-hover,
+    .card-hover::before {
+      transition: none;
+    }
+
+    .card-hover:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Typography atoms ---- */
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+  }
+
+  /* Mono #tag chip. Add the leading "#" in markup. */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    color: var(--color-muted);
+    /* Short tags stay on one line; a long one (up to 30 characters) wraps inside its chip instead of forcing the row wider. */
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  @media (hover: hover) {
+    .tag:hover {
+      color: var(--color-accent);
+      background-color: var(--color-accent-soft);
+      border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    }
+  }
+
+  /* ---- Motion ---- */
+
+  /* Staggered entrance: set style="--i: 0", "--i: 1" ... on siblings. */
+  .reveal {
+    animation: dc-reveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+    }
+  }
+
+  /* Shimmer skeleton. Moves a pseudo-element with transform; the background never repaints. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-surface-2);
+    isolation: isolate;
+  }
+
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-fg) 7%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+    will-change: transform;
+    animation: dc-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+      display: none;
+    }
+  }
+
+  /* Reading progress bar, driven by scroll position. Falls back to no bar where unsupported. */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: dc-scroll-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  /* ---- Layout helpers ---- */
+
+  /* Keeps fixed bottom bars clear of the iOS home indicator. */
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
+  /* Skips rendering off-screen content in long lists. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
+  /* ---- Article typography (rendered markdown) ---- */
+
   .prose-dev {
     color: var(--color-fg);
-    font-size: 1rem;
+    font-size: 1.0625rem;
     line-height: 1.75;
     overflow-wrap: break-word;
+  }
+
+  @media (min-width: 40rem) {
+    .prose-dev {
+      font-size: 1.125rem;
+    }
   }
 
   .prose-dev > * + * {
@@ -94,31 +344,30 @@
   .prose-dev h2,
   .prose-dev h3,
   .prose-dev h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
     color: var(--color-fg);
-    font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.15;
     letter-spacing: -0.01em;
-    margin-top: 2em;
-    margin-bottom: 0.75em;
+    margin-top: 2.1em;
+    margin-bottom: 0.6em;
     scroll-margin-top: 5rem;
   }
 
   .prose-dev h1 {
-    font-size: 1.875rem;
+    font-size: 2.25rem;
   }
 
   .prose-dev h2 {
-    font-size: 1.5rem;
-    padding-bottom: 0.4em;
-    border-bottom: 1px solid var(--color-line);
+    font-size: 1.875rem;
   }
 
   .prose-dev h3 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 
   .prose-dev h4 {
-    font-size: 1.0625rem;
+    font-size: 1.25rem;
   }
 
   .prose-dev p {
@@ -130,11 +379,17 @@
     font-weight: 600;
   }
 
+  .prose-dev em {
+    font-style: italic;
+  }
+
   .prose-dev a {
-    color: color-mix(in srgb, var(--color-brand) 55%, white);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--color-brand) 60%, transparent);
-    text-underline-offset: 3px;
+    color: var(--color-accent);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: text-decoration-color 150ms ease;
   }
 
   .prose-dev a:hover {
@@ -159,7 +414,7 @@
   }
 
   .prose-dev li + li {
-    margin-top: 0.35em;
+    margin-top: 0.4em;
   }
 
   .prose-dev li::marker {
@@ -169,35 +424,43 @@
   .prose-dev :not(pre) > code {
     font-family: var(--font-mono);
     font-size: 0.875em;
+    color: var(--color-fg);
     background-color: var(--color-surface-2);
     border: 1px solid var(--color-line);
     border-radius: 0.375rem;
     padding: 0.1em 0.35em;
+    overflow-wrap: anywhere;
   }
 
   .prose-dev pre {
     max-width: 100%;
     overflow-x: auto;
     font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     line-height: 1.7;
     background-color: var(--color-surface);
     border: 1px solid var(--color-line);
     border-radius: 0.75rem;
     padding: 1rem 1.125rem;
+    scrollbar-width: thin;
   }
 
   .prose-dev pre code {
     font-size: inherit;
+    color: inherit;
     background: none;
     border: 0;
     padding: 0;
   }
 
   .prose-dev blockquote {
-    border-left: 3px solid var(--color-brand);
-    padding: 0.25em 0 0.25em 1rem;
+    border-left: 3px solid var(--color-accent);
+    padding: 0.25em 0 0.25em 1.125rem;
     color: var(--color-muted);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25em;
+    line-height: 1.5;
   }
 
   .prose-dev table {
@@ -205,7 +468,7 @@
     max-width: 100%;
     overflow-x: auto;
     border-collapse: collapse;
-    font-size: 0.9375rem;
+    font-size: 0.9375em;
   }
 
   .prose-dev th,

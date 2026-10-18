@@ -14,6 +14,7 @@ export type SpinnerProps = {
   className?: string;
 };
 
+// A 3/4 ring on a faint track. Spins only when motion is allowed.
 export function Spinner({ size = "md", label = "Loading", className }: SpinnerProps) {
   return (
     <span role="status" className={cn("inline-flex shrink-0", className)}>
@@ -22,10 +23,10 @@ export function Spinner({ size = "md", label = "Loading", className }: SpinnerPr
         fill="none"
         aria-hidden="true"
         focusable="false"
-        className={cn("animate-spin text-current", SIZES[size])}
+        className={cn("motion-safe:animate-spin text-current", SIZES[size])}
       >
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-        <path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.2" strokeWidth="2.5" />
+        <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
       </svg>
       <span className="sr-only">{label}</span>
     </span>

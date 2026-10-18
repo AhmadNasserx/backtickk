@@ -2,21 +2,27 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-export type ButtonSize = "sm" | "md";
+export type ButtonSize = "sm" | "md" | "lg";
 
+// Touch targets grow to 44px below the sm breakpoint. Press feedback is a small scale-down.
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium select-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium select-none cursor-pointer transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-colors motion-reduce:active:scale-100";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-brand text-white hover:bg-brand-hover",
-  secondary: "border border-line bg-surface-2 text-fg hover:bg-line",
+  // The glow is a box-shadow transition on hover; the inner highlight gives the lime a little depth.
+  primary:
+    "bg-accent text-accent-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)] hover:bg-accent-hover hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35),0_8px_28px_-8px_color-mix(in_srgb,var(--color-accent)_70%,transparent)]",
+  secondary:
+    "border border-line bg-surface-2 text-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] hover:border-line-strong hover:bg-surface-3",
   ghost: "text-muted hover:bg-surface-2 hover:text-fg",
-  danger: "bg-danger text-white hover:bg-danger/90",
+  danger:
+    "bg-danger text-bg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.3)] hover:bg-danger/90",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
+  sm: "h-8 px-3 text-sm max-sm:h-11 max-sm:px-4",
+  md: "h-10 px-4 text-sm max-sm:h-11",
+  lg: "h-12 px-6 text-base",
 };
 
 // Shared with <Link> so links can look like buttons without nesting interactive elements.
