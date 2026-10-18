@@ -55,6 +55,11 @@ export const paginationQuerySchema = z.object({
   limit: pageSize(10),
 });
 
+/** Same paging as paginationQuerySchema, with the member list's default page size. */
+export const membersQuerySchema = paginationQuerySchema.extend({
+  limit: pageSize(12),
+});
+
 export const postsQuerySchema = z.object({
   search: optionalFilter(100),
   community: slugFilter,

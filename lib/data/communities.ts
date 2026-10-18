@@ -2,12 +2,27 @@ import type { QueryFilter, Types } from 'mongoose';
 import { escapeRegex } from '@/lib/escape-regex';
 import { assertObjectId, connectDB, isDuplicateKeyError } from '@/lib/db';
 import { notFound } from '@/lib/errors';
-import { pageWindow, toCommunityDTO, toPaginated, type LeanCommunity } from '@/lib/serialize';
+import {
+  PUBLIC_AUTHOR_FIELDS,
+  pageWindow,
+  toCommunityDTO,
+  toPaginated,
+  type LeanCommunity,
+  type LeanPublicUser,
+} from '@/lib/serialize';
 import { Community, type CommunityAttributes } from '@/models/community';
 import { Membership } from '@/models/membership';
 import { Post, type PostAttributes } from '@/models/post';
+import { User } from '@/models/user';
 import type { CommunitiesQuery } from '@/schemas/query';
-import type { CommunityDTO, MembershipDTO, PaginatedResult, SessionUser, TopicCountDTO } from '@/types';
+import type {
+  CommunityDTO,
+  MemberDTO,
+  MembershipDTO,
+  PaginatedResult,
+  SessionUser,
+  TopicCountDTO,
+} from '@/types';
 
 type CommunityFilter = QueryFilter<CommunityAttributes>;
 type PostFilter = QueryFilter<PostAttributes>;
@@ -149,6 +164,51 @@ export async function getFeaturedCommunities(limit: number): Promise<CommunityDT
     .limit(clampCount(limit, MAX_LIST_LIMIT))
     .lean<LeanCommunity[]>();
   return rows.map(toCommunityDTO);
+}
+
+interface LeanMembership {
+  createdAt: Date;
+  user: LeanPublicUser | null;
+}
+
+/** Members newest first. A member whose account was deleted has no public profile, so it is left out of the page. */
+export async function listCommunityMembers(
+  communityId: string,
+  query: { page?: number; limit?: number } = {},
+): Promise<PaginatedResult<MemberDTO>> {
+  assertObjectId(communityId, 'community id');
+  await connectDB();
+
+  const exists = await Community.exists({ _id: communityId });
+  if (!exists) {
+    throw notFound('Community not found');
+  }
+
+  const window = pageWindow({ page: query.page, limit: query.limit }, DEFAULT_PAGE_SIZE);
+  const filter = { community: communityId };
+  const [rows, total] = await Promise.all([
+    Membership.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(window.skip)
+      .limit(window.limit)
+      .populate({ path: 'user', model: User, select: PUBLIC_AUTHOR_FIELDS })
+      .lean<LeanMembership[]>(),
+    Membership.countDocuments(filter),
+  ]);
+
+  const items = rows.flatMap((row): MemberDTO[] => {
+    if (!row.user) return [];
+    return [
+      {
+        id: row.user._id.toString(),
+        name: row.user.name,
+        username: row.user.username,
+        image: row.user.image ?? null,
+        joinedAt: row.createdAt.toISOString(),
+      },
+    ];
+  });
+  return toPaginated(items, total, window);
 }
 
 /** Distinct topics used by any community or any published post, alphabetically sorted. */

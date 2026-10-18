@@ -94,6 +94,15 @@ export interface MembershipDTO {
   memberCount: number;
 }
 
+/** A community member as shown publicly. Never carries email. */
+export interface MemberDTO {
+  id: string;
+  name: string;
+  username: string;
+  image: string | null;
+  joinedAt: string;
+}
+
 export interface BookmarkStatusDTO {
   bookmarked: boolean;
 }

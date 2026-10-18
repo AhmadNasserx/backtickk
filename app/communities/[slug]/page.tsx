@@ -1,17 +1,18 @@
-// ISR (60 s): community details and its latest posts are public and shared by every visitor. Membership is a
-// per-user client island, and the join/leave and post routes revalidate this page on demand.
+// ISR (60 s): community details, members and its latest posts are public and shared by every visitor. Membership
+// is a per-user client island, and the join/leave and post routes revalidate this page on demand.
 // generateStaticParams returns [] so pages are built on the first request, then cached.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { CommunityIcon, communityTint } from "@/components/features/community-card";
+import { MemberList } from "@/components/features/member-list";
 import { JoinCommunityButton } from "@/components/features/join-community-button";
 import { PostCard } from "@/components/features/post-card";
 import { TopicChips } from "@/components/features/topic-chips";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
-import { getCommunityBySlug } from "@/lib/data/communities";
+import { getCommunityBySlug, listCommunityMembers } from "@/lib/data/communities";
 import { listPosts } from "@/lib/data/posts";
 
 export const revalidate = 60;
@@ -39,7 +40,10 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
     notFound();
   }
 
-  const latest = await listPosts({ community: community.slug, limit: 10 });
+  const [latest, members] = await Promise.all([
+    listPosts({ community: community.slug, limit: 10 }),
+    listCommunityMembers(community.id, { limit: 12 }),
+  ]);
   // The banner is tinted by the community colour; without a valid one it falls back to the accent.
   const tint = communityTint(community.color) ?? "var(--color-accent)";
 
@@ -85,6 +89,8 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
           />
         </section>
       ) : null}
+
+      <MemberList members={members.items} total={members.total} communityName={community.name} />
 
       <section aria-labelledby="community-posts" className="flex flex-col gap-6">
         <div className="flex items-end justify-between gap-4 border-b border-line pb-4">

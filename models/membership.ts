@@ -20,7 +20,8 @@ const membershipSchema = new Schema<MembershipAttributes>(
 );
 
 membershipSchema.index({ user: 1, community: 1 }, { unique: true });
-membershipSchema.index({ community: 1 });
+// Also serves the plain `{ community }` lookups, so it replaces the single-field index.
+membershipSchema.index({ community: 1, createdAt: -1, _id: -1 });
 
 export const Membership: Model<MembershipAttributes> =
   (models.Membership as Model<MembershipAttributes> | undefined) ??
