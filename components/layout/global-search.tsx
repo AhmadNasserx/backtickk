@@ -21,7 +21,7 @@ export function GlobalSearch({ className }: { className?: string }) {
   return (
     <form role="search" onSubmit={onSubmit} className={cn("relative min-w-0", className)}>
       <label htmlFor={INPUT_ID} className="sr-only">
-        Search posts and communities
+        Search posts
       </label>
       <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
       <input
