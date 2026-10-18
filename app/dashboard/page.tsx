@@ -4,15 +4,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PostCard } from "@/components/features/post-card";
 import { DeletePostButton } from "@/components/features/delete-post-button";
+import { ProfileCompletion } from "@/components/features/profile-completion";
 import { Badge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ArrowRightIcon, BookmarkIcon, EditIcon, FileTextIcon, PenLineIcon, UsersIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, BookmarkIcon, EditIcon, EyeIcon, FileTextIcon, PenLineIcon, UsersIcon } from "@/components/ui/icons";
 import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { requireUserOrRedirect } from "@/lib/auth-helpers";
 import { listBookmarks } from "@/lib/data/bookmarks";
 import { listUserCommunities } from "@/lib/data/communities";
 import { listPostsByAuthor } from "@/lib/data/posts";
+import { getUserDTOById } from "@/lib/data/users";
 import { formatCount } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -44,7 +46,8 @@ export default async function DashboardPage() {
   const user = await requireUserOrRedirect("/dashboard");
 
   // Drafts appear only in the author's own list; the published count leaves them out.
-  const [myPosts, publishedPosts, bookmarks, communities] = await Promise.all([
+  const [profile, myPosts, publishedPosts, bookmarks, communities] = await Promise.all([
+    getUserDTOById(user.id),
     listPostsByAuthor(user.username, { limit: POSTS_PREVIEW, viewer: user }),
     listPostsByAuthor(user.username, { limit: 1 }),
     listBookmarks(user.id, { limit: 1 }),
@@ -69,6 +72,13 @@ export default async function DashboardPage() {
           {greeting}, <em className="text-accent italic">{firstName}</em>
         </h1>
       </header>
+
+      <ProfileCompletion
+        bio={profile?.bio ?? ""}
+        skills={profile?.skills ?? []}
+        hasJoinedCommunity={communities.length > 0}
+        hasPublishedPost={publishedPosts.total > 0}
+      />
 
       <dl className="grid grid-cols-3 gap-2 sm:gap-3">
         {stats.map(({ label, value, Icon }, index) => (
@@ -141,6 +151,19 @@ export default async function DashboardPage() {
                           Edit
                           <span className="sr-only">{post.title}</span>
                         </Link>
+                        {post.status === "draft" ? (
+                          <Link href={`/blogs/${post.slug}/preview`} className={buttonClasses("secondary", "sm")}>
+                            <EyeIcon className="size-3.5" />
+                            Preview
+                            <span className="sr-only">{post.title}</span>
+                          </Link>
+                        ) : (
+                          <Link href={`/blogs/${post.slug}`} className={buttonClasses("secondary", "sm")}>
+                            <EyeIcon className="size-3.5" />
+                            View
+                            <span className="sr-only">{post.title}</span>
+                          </Link>
+                        )}
                         <DeletePostButton postId={post.id} redirectTo="/dashboard" />
                       </>
                     }

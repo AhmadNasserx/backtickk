@@ -24,12 +24,19 @@ const SECTIONS = [
   { id: "session", label: "Session" },
 ] as const;
 
-export default async function SettingsPage() {
+type SettingsSearchParams = Promise<{
+  welcome?: string | string[];
+}>;
+
+export default async function SettingsPage({ searchParams }: { searchParams: SettingsSearchParams }) {
   const user = await requireUserOrRedirect("/settings");
   const profile = await getUserDTOById(user.id);
   if (!profile) {
     notFound();
   }
+
+  const params = await searchParams;
+  const welcome = (Array.isArray(params.welcome) ? params.welcome[0] : params.welcome) === "1";
 
   return (
     <div className="flex flex-col gap-8">
@@ -56,6 +63,18 @@ export default async function SettingsPage() {
         </nav>
 
         <div className="flex min-w-0 flex-col gap-12">
+          {welcome ? (
+            <div
+              role="status"
+              className="flex min-w-0 flex-col gap-1.5 rounded-2xl border border-accent/30 bg-accent-soft p-5 sm:p-6"
+            >
+              <p className="font-display text-2xl leading-tight text-fg text-balance">
+                Welcome to Backtick — tell people who you are
+              </p>
+              <p className="text-sm text-muted">A short bio and a few skills help other developers find and trust your writing.</p>
+            </div>
+          ) : null}
+
           <section id="profile" aria-labelledby="settings-profile-heading" className="flex scroll-mt-24 flex-col gap-4">
             <div className="flex flex-col gap-1">
               <h2 id="settings-profile-heading" className="font-display text-2xl text-fg">
