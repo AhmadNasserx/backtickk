@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +26,7 @@ const SKILLS_MAX = 15;
 
 export function ProfileForm({ initial }: { initial: ProfileFormInitial }) {
   const router = useRouter();
+  const { update } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<ProfileFormInitial>(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -73,6 +75,8 @@ export function ProfileForm({ initial }: { initial: ProfileFormInitial }) {
         return;
       }
       setSaved(true);
+      // Refreshes the JWT (username, role) so the header menu's profile link is current.
+      await update();
       router.refresh();
     } catch {
       setFormError(NETWORK_ERROR);

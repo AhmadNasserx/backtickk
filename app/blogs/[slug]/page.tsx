@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: post.title,
     description: post.excerpt,
-    openGraph: { title: post.title, description: post.excerpt, type: "article", publishedTime: post.publishedAt },
+    openGraph: { title: post.title, description: post.excerpt, type: "article", publishedTime: post.publishedAt ?? post.createdAt },
   };
 }
 
@@ -60,7 +60,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </Badge>
             </Link>
           ) : null}
-          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+          <time dateTime={post.publishedAt ?? post.createdAt}>{formatDate(post.publishedAt ?? post.createdAt)}</time>
           <span aria-hidden="true">·</span>
           <span>{post.readingTime} min read</span>
         </div>

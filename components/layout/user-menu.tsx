@@ -94,7 +94,7 @@ export function UserMenu() {
           <div className="my-1 h-px bg-line" />
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirectTo: "/" })}
             className={`${MENU_LINK} w-full text-left`}
           >
             Sign out

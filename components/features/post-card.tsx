@@ -41,6 +41,8 @@ function AuthorLink({ author }: { author: AuthorRefDTO }) {
 
 export function PostCard({ post, actions, headingLevel = "h2", className }: PostCardProps) {
   const Heading = headingLevel;
+  // Drafts have no publish date; show when they were created instead.
+  const displayedAt = post.publishedAt ?? post.createdAt;
 
   return (
     <article
@@ -73,7 +75,7 @@ export function PostCard({ post, actions, headingLevel = "h2", className }: Post
                 </Badge>
               </Link>
             ) : null}
-            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={displayedAt}>{formatDate(displayedAt)}</time>
             <span aria-hidden="true">·</span>
             <span>{post.readingTime} min read</span>
           </div>

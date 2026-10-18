@@ -62,7 +62,8 @@ export interface PostSummaryDTO {
   tags: string[];
   status: PostStatus;
   readingTime: number;
-  publishedAt: string;
+  /** Null for drafts; use createdAt where a date must always be shown. */
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

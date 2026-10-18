@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import { authConfig } from '@/auth.config';
-import { isOAuthProvider, upsertOAuthUser } from '@/lib/data/users';
+import { getSessionUserById, isOAuthProvider, upsertOAuthUser } from '@/lib/data/users';
 
 /*
  * Full Auth.js setup (Node runtime only). Database access happens here, on first
@@ -9,7 +9,17 @@ import { isOAuthProvider, upsertOAuthUser } from '@/lib/data/users';
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile, trigger }) {
+      // Sent by useSession().update() after a profile save, so the token picks up the new username and role.
+      if (trigger === 'update') {
+        const fresh = token.uid ? await getSessionUserById(token.uid) : null;
+        if (fresh) {
+          token.username = fresh.username;
+          token.role = fresh.role;
+        }
+        return token;
+      }
+
       // `account` is only present on the sign-in request itself.
       if (!account || !user || !isOAuthProvider(account.provider)) {
         return token;

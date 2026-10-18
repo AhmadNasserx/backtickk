@@ -62,7 +62,7 @@ export interface LeanPost {
   tags: string[];
   status: PostStatus;
   readingTime: number;
-  publishedAt: Date;
+  publishedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -147,7 +147,8 @@ export function toPostSummary(post: LeanPost): PostSummaryDTO {
     tags: post.tags,
     status: post.status,
     readingTime: post.readingTime,
-    publishedAt: iso(post.publishedAt),
+    // Drafts never expose a publish date, even if an older record still carries one.
+    publishedAt: post.status === 'published' && post.publishedAt ? iso(post.publishedAt) : null,
     createdAt: iso(post.createdAt),
     updatedAt: iso(post.updatedAt),
   };

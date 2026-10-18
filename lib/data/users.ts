@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { assertObjectId, connectDB, isDuplicateKeyError } from '@/lib/db';
+import { assertObjectId, connectDB, isDuplicateKeyError, isObjectId } from '@/lib/db';
 import { conflict, notFound } from '@/lib/errors';
 import { toPublicProfile, toUserDTO, type LeanFullUser, type LeanPublicUser } from '@/lib/serialize';
 import { User } from '@/models/user';
@@ -137,6 +137,16 @@ export async function getPublicProfileByUsername(username: string): Promise<Publ
     .select('name username image bio skills createdAt')
     .lean<LeanPublicUser>();
   return row ? toPublicProfile(row) : null;
+}
+
+/** Current username and role for the session token; null if the user no longer exists. */
+export async function getSessionUserById(id: string): Promise<SessionUser | null> {
+  if (!isObjectId(id)) return null;
+  await connectDB();
+  const row = await User.findById(id)
+    .select('name username image role')
+    .lean<{ _id: Types.ObjectId; name: string; username: string; image?: string | null; role: UserRole }>();
+  return row ? toSessionUser(row) : null;
 }
 
 /** The signed-in user's own record, including email (never use this for public output). */

@@ -27,6 +27,7 @@ type PostFilter = QueryFilter<PostAttributes>;
 type Viewer = SessionUser | null | undefined;
 
 const DEFAULT_PAGE_SIZE = 10;
+const MAX_SLUG_ATTEMPTS = 2;
 const POST_POPULATE = [
   { path: 'author', select: PUBLIC_AUTHOR_FIELDS },
   { path: 'community', select: PUBLIC_COMMUNITY_FIELDS },
@@ -140,32 +141,38 @@ export async function createPost(user: SessionUser, input: CreatePostInput): Pro
     throw forbidden('Join this community before publishing in it');
   }
 
-  const slug = await uniqueSlug(Post, input.title);
-  try {
-    const created = await Post.create({
-      title: input.title,
-      slug,
-      excerpt: input.excerpt,
-      content: input.content,
-      coverImage: input.coverImage || undefined,
-      author: user.id,
-      community: communityId,
-      tags: input.tags,
-      status: input.status ?? 'published',
-      readingTime: readingTime(input.content),
-      publishedAt: new Date(),
-    });
-    const detail = await findPostDetail({ _id: created._id.toString() }, user);
-    if (!detail) {
-      throw notFound('Post not found after creation');
+  const status = input.status ?? 'published';
+  let created: { _id: Types.ObjectId } | null = null;
+  for (let attempt = 1; created === null; attempt += 1) {
+    // uniqueSlug checks before writing, so a concurrent insert can still take the slug; regenerate once.
+    const slug = await uniqueSlug(Post, input.title);
+    try {
+      created = await Post.create({
+        title: input.title,
+        slug,
+        excerpt: input.excerpt,
+        content: input.content,
+        coverImage: input.coverImage || undefined,
+        author: user.id,
+        community: communityId,
+        tags: input.tags,
+        status,
+        readingTime: readingTime(input.content),
+        publishedAt: status === 'published' ? new Date() : undefined,
+      });
+    } catch (error) {
+      if (!isDuplicateKeyError(error)) throw error;
+      if (attempt >= MAX_SLUG_ATTEMPTS) {
+        throw conflict('Could not generate a unique slug, please try again');
+      }
     }
-    return detail;
-  } catch (error) {
-    if (isDuplicateKeyError(error)) {
-      throw conflict('A post with this title already exists, please change the title');
-    }
-    throw error;
   }
+
+  const detail = await findPostDetail({ _id: created._id.toString() }, user);
+  if (!detail) {
+    throw notFound('Post not found after creation');
+  }
+  return detail;
 }
 
 /** The slug is stable after creation (links stay valid); only content-derived fields are recomputed. */
@@ -173,7 +180,9 @@ export async function updatePost(user: SessionUser, id: string, input: UpdatePos
   assertObjectId(id, 'post id');
   await connectDB();
 
-  const existing = await Post.findById(id).select('author community').lean<{ author: Types.ObjectId; community: Types.ObjectId }>();
+  const existing = await Post.findById(id)
+    .select('author community status')
+    .lean<{ author: Types.ObjectId; community: Types.ObjectId; status: PostStatus }>();
   if (!existing) {
     throw notFound('Post not found');
   }
@@ -200,7 +209,12 @@ export async function updatePost(user: SessionUser, id: string, input: UpdatePos
     set.readingTime = readingTime(input.content);
   }
   if (input.tags !== undefined) set.tags = input.tags;
-  if (input.status !== undefined) set.status = input.status;
+  if (input.status !== undefined) {
+    set.status = input.status;
+    // publishedAt records the publication, so it is set on each draft-to-published transition and cleared when unpublished.
+    if (input.status === 'published' && existing.status === 'draft') set.publishedAt = new Date();
+    if (input.status === 'draft' && existing.status === 'published') unset.publishedAt = 1;
+  }
   if (input.coverImage === '') {
     unset.coverImage = 1;
   } else if (input.coverImage !== undefined) {

@@ -12,7 +12,8 @@ export interface PostAttributes {
   tags: string[];
   status: PostStatus;
   readingTime: number;
-  publishedAt: Date;
+  /** Set only while the post is published; drafts have none. */
+  publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,7 +38,7 @@ const postSchema = new Schema<PostAttributes>(
     },
     status: { type: String, enum: POST_STATUSES, default: 'published' },
     readingTime: { type: Number, required: true, min: 1 },
-    publishedAt: { type: Date, required: true },
+    publishedAt: { type: Date },
   },
   { timestamps: true },
 );
