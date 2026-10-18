@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { PostCover } from "@/components/features/post-cover";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { cn, formatDate } from "@/lib/utils";
 import type { AuthorRefDTO, PostSummaryDTO } from "@/types";
 
@@ -47,12 +48,17 @@ function AuthorLink({ author }: { author: AuthorRefDTO }) {
 }
 
 function Meta({ post, displayedAt }: { post: PostSummaryDTO; displayedAt: string }) {
+  const logo = communityLogoSlug(post.community);
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 font-mono text-xs text-subtle">
       {post.community.id ? (
         <Link href={`/communities/${post.community.slug}`} className="relative z-10">
           <Badge variant="brand">
-            {post.community.icon ? <span aria-hidden="true">{post.community.icon}</span> : null}
+            {logo ? (
+              <span aria-hidden="true" className="inline-flex">
+                <TechLogo slug={logo} className="size-3.5" />
+              </span>
+            ) : null}
             {post.community.name}
           </Badge>
         </Link>

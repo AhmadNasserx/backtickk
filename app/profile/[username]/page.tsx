@@ -6,6 +6,7 @@ import { cache, type CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/features/post-card";
 import { Avatar } from "@/components/ui/avatar";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listUserCommunities } from "@/lib/data/communities";
 import { listPostsByAuthor } from "@/lib/data/posts";
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   }
   return {
     title: `${profile.name} (@${profile.username})`,
-    description: profile.bio || `Profile of @${profile.username} on DevCommunity.`,
+    description: profile.bio || `Profile of @${profile.username} on Backtick.`,
   };
 }
 
@@ -139,6 +140,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           <ul className="flex flex-wrap gap-2.5">
             {communities.map((community) => {
               const tint = community.color && HEX_COLOR.test(community.color) ? community.color : null;
+              const logo = communityLogoSlug(community);
               return (
                 <li key={community.id} className="max-w-full">
                   <Link
@@ -150,7 +152,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                       style={tint ? { backgroundColor: `color-mix(in srgb, ${tint} 28%, transparent)` } : undefined}
                       className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-fg"
                     >
-                      {community.icon || community.name.charAt(0).toUpperCase()}
+                      {logo ? <TechLogo slug={logo} className="size-4" /> : community.name.charAt(0).toUpperCase()}
                     </span>
                     <span className="min-w-0 truncate font-medium">{community.name}</span>
                     <span className="font-mono text-xs text-subtle">{formatCount(community.memberCount)}</span>

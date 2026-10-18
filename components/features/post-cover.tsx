@@ -1,6 +1,7 @@
 // Server component: most posts have no cover image, so the cover is drawn with CSS and makes no image request.
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { cn } from "@/lib/utils";
 
 const HEX_COLOR = /^#[0-9a-f]{3,8}$/i;
@@ -8,7 +9,7 @@ const FALLBACK_TINT = "var(--color-accent)";
 
 export type PostCoverProps = {
   title: string;
-  community: { name: string; icon?: string | null; color?: string | null };
+  community: { name: string; slug?: string | null; icon?: string | null; color?: string | null };
   coverImage?: string | null;
   className?: string;
   /** Loads the image eagerly. Only for an above-the-fold cover. */
@@ -17,7 +18,7 @@ export type PostCoverProps = {
 
 /**
  * Fixed 16:9 frame. Without an image it is a gradient and dot grid tinted by the community colour, with the
- * community icon large and faint. Layout (border, radius, aspect) comes from className, so callers can reshape it.
+ * community logo (or initial) large and faint. Layout (border, radius, aspect) comes from className, so callers can reshape it.
  */
 export function PostCover({ title, community, coverImage, className, priority = false }: PostCoverProps) {
   if (coverImage) {
@@ -38,7 +39,7 @@ export function PostCover({ title, community, coverImage, className, priority = 
   }
 
   const tint = community.color && HEX_COLOR.test(community.color) ? community.color : FALLBACK_TINT;
-  const glyph = community.icon || community.name.charAt(0).toUpperCase();
+  const logo = communityLogoSlug(community);
   const style = {
     "--cover": tint,
     backgroundImage: [
@@ -51,12 +52,21 @@ export function PostCover({ title, community, coverImage, className, priority = 
 
   return (
     <div aria-hidden="true" style={style} className={cn("relative aspect-video overflow-hidden bg-surface-2", className)}>
-      <span
-        style={{ color: tint }}
-        className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-[5.5rem] leading-none opacity-25 blur-[1.5px] select-none"
-      >
-        {glyph}
-      </span>
+      {logo ? (
+        <span
+          style={{ color: tint }}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10 select-none"
+        >
+          <TechLogo slug={logo} mono className="h-2/5 w-auto aspect-square" />
+        </span>
+      ) : (
+        <span
+          style={{ color: tint }}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-[5.5rem] leading-none opacity-25 blur-[1.5px] select-none"
+        >
+          {community.name.charAt(0).toUpperCase()}
+        </span>
+      )}
     </div>
   );
 }

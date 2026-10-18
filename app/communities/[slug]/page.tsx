@@ -58,7 +58,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
 
         <div className="relative flex flex-col gap-6 px-6 pb-8 sm:flex-row sm:items-end sm:justify-between sm:px-8">
           <div className="-mt-10 flex min-w-0 flex-col gap-5 sm:-mt-12 sm:flex-row sm:items-end">
-            <CommunityIcon community={community} size="xl" className="ring-4 ring-surface" />
+            <CommunityIcon community={community} slug={community.slug} size="xl" className="ring-4 ring-surface" />
             <div className="flex min-w-0 flex-col gap-2">
               <h1 className="font-display text-4xl leading-tight tracking-tight text-fg sm:text-5xl">{community.name}</h1>
               <p className="max-w-2xl text-base leading-7 text-muted">{community.description}</p>

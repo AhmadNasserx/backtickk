@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ArrowRightIcon, BookmarkIcon, EditIcon, FileTextIcon, PenLineIcon, UsersIcon } from "@/components/ui/icons";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { requireUserOrRedirect } from "@/lib/auth-helpers";
 import { listBookmarks } from "@/lib/data/bookmarks";
 import { listUserCommunities } from "@/lib/data/communities";
@@ -204,34 +205,37 @@ export default async function DashboardPage() {
               />
             ) : (
               <ul className="flex flex-col rounded-2xl border border-line bg-surface p-1.5">
-                {communities.map((community) => (
-                  <li key={community.id}>
-                    <Link
-                      href={`/communities/${community.slug}`}
-                      className="group flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-2 text-base"
-                        style={
-                          community.color
-                            ? { backgroundColor: `color-mix(in srgb, ${community.color} 18%, transparent)` }
-                            : undefined
-                        }
+                {communities.map((community) => {
+                  const logo = communityLogoSlug(community);
+                  return (
+                    <li key={community.id}>
+                      <Link
+                        href={`/communities/${community.slug}`}
+                        className="group flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
                       >
-                        {community.icon ?? community.name.charAt(0)}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-fg group-hover:text-accent">
-                          {community.name}
+                        <span
+                          aria-hidden="true"
+                          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-2 font-mono text-base font-semibold text-fg"
+                          style={
+                            community.color
+                              ? { backgroundColor: `color-mix(in srgb, ${community.color} 18%, transparent)` }
+                              : undefined
+                          }
+                        >
+                          {logo ? <TechLogo slug={logo} className="size-5" /> : community.name.charAt(0).toUpperCase()}
                         </span>
-                        <span className="block font-mono text-xs text-subtle">
-                          {formatCount(community.memberCount)} members
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-fg group-hover:text-accent">
+                            {community.name}
+                          </span>
+                          <span className="block font-mono text-xs text-subtle">
+                            {formatCount(community.memberCount)} members
+                          </span>
                         </span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
 

@@ -13,6 +13,7 @@ import { PostCover } from "@/components/features/post-cover";
 import { PostOwnerActions } from "@/components/features/post-owner-actions";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { listComments } from "@/lib/data/comments";
 import { getPostBySlug, listPosts } from "@/lib/data/posts";
 import { formatDate } from "@/lib/utils";
@@ -55,6 +56,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   ]);
   const related = sameCommunity?.items.filter((item) => item.id !== post.id).slice(0, RELATED_SHOWN) ?? [];
   const publishedAt = post.publishedAt ?? post.createdAt;
+  const logo = communityLogoSlug(post.community);
 
   return (
     <>
@@ -68,7 +70,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               {post.community.id ? (
                 <Link href={`/communities/${post.community.slug}`}>
                   <Badge variant="brand">
-                    {post.community.icon ? <span aria-hidden="true">{post.community.icon}</span> : null}
+                    {logo ? (
+                      <span aria-hidden="true" className="inline-flex">
+                        <TechLogo slug={logo} className="size-3.5" />
+                      </span>
+                    ) : null}
                     {post.community.name}
                   </Badge>
                 </Link>

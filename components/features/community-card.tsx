@@ -1,6 +1,7 @@
 // Server component: the card is static markup; only the join button is a client island.
 import Link from "next/link";
 import { JoinCommunityButton } from "@/components/features/join-community-button";
+import { TechLogo, communityLogoSlug } from "@/components/ui/tech-logo";
 import { cn } from "@/lib/utils";
 import type { CommunityDTO } from "@/types";
 
@@ -13,10 +14,13 @@ export function communityTint(color: string | null | undefined): string | undefi
 
 export type CommunityIconProps = {
   community: Pick<CommunityDTO, "name" | "icon" | "color">;
+  /** The community slug, used to find a logo when the stored icon is not a logo slug. */
+  slug?: string;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 };
 
+// Text sizes apply to the initial shown when no logo matches; logo sizes apply to the brand mark.
 const ICON_SIZES = {
   sm: "size-9 text-sm",
   md: "size-11 text-lg",
@@ -24,10 +28,20 @@ const ICON_SIZES = {
   xl: "size-20 text-3xl sm:size-24 sm:text-4xl",
 } as const;
 
-/** Emoji or short text when the community has one, otherwise its initial, tinted with the community colour when it is a hex value. */
-export function CommunityIcon({ community, size = "md", className }: CommunityIconProps) {
-  const label = community.icon || community.name.charAt(0).toUpperCase();
+const LOGO_SIZES = {
+  sm: "size-5",
+  md: "size-6",
+  lg: "size-8",
+  xl: "size-10 sm:size-12",
+} as const;
+
+/**
+ * The community's brand logo centred in its tinted tile, or the first letter of its name when no logo matches.
+ * Stored icon text is never rendered as-is.
+ */
+export function CommunityIcon({ community, slug, size = "md", className }: CommunityIconProps) {
   const tint = communityTint(community.color);
+  const logo = communityLogoSlug({ icon: community.icon, slug, name: community.name });
 
   return (
     <span
@@ -41,13 +55,13 @@ export function CommunityIcon({ community, size = "md", className }: CommunityIc
           : undefined
       }
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-xl border font-display text-fg",
-        tint ? "" : "border-line bg-accent-soft text-accent",
+        "flex shrink-0 items-center justify-center rounded-xl border font-mono font-semibold",
+        tint ? "text-fg" : "border-line bg-accent-soft text-accent",
         ICON_SIZES[size],
         className,
       )}
     >
-      {label}
+      {logo ? <TechLogo slug={logo} className={LOGO_SIZES[size]} /> : community.name.charAt(0).toUpperCase()}
     </span>
   );
 }
@@ -95,7 +109,7 @@ export function CommunityCard({ community, headingLevel = "h2", variant = "defau
           style={{ background: `radial-gradient(closest-side, ${tint ?? "var(--color-accent)"}, transparent)` }}
         />
         <div className="flex items-start justify-between gap-4">
-          <CommunityIcon community={community} size="lg" />
+          <CommunityIcon community={community} slug={community.slug} size="lg" />
           <span className="eyebrow">Featured</span>
         </div>
         <div className="flex min-w-0 flex-col gap-3">
@@ -121,7 +135,7 @@ export function CommunityCard({ community, headingLevel = "h2", variant = "defau
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <CommunityIcon community={community} size="sm" />
+          <CommunityIcon community={community} slug={community.slug} size="sm" />
           <div className="flex min-w-0 flex-col">
             <Heading className="truncate text-base font-semibold tracking-tight text-fg">
               <Link href={`/communities/${community.slug}`} className="transition-colors hover:text-accent">
@@ -144,7 +158,7 @@ export function CommunityCard({ community, headingLevel = "h2", variant = "defau
       )}
     >
       <div className="flex items-start gap-4">
-        <CommunityIcon community={community} />
+        <CommunityIcon community={community} slug={community.slug} />
         <div className="flex min-w-0 flex-col gap-1.5">
           <Heading className="text-lg font-semibold tracking-tight text-fg">
             <Link href={`/communities/${community.slug}`} className="transition-colors hover:text-accent">

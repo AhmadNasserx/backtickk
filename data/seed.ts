@@ -12,6 +12,7 @@ export interface SeedCommunity {
   name: string;
   description: string;
   topics: string[];
+  /** A TECH_LOGOS slug (see data/tech-logos.ts), rendered as a brand logo. */
   icon: string;
   color: string;
   createdBy: string;
@@ -63,7 +64,7 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'Build interactive interfaces with components, hooks and a clear data flow. Share patterns for state, rendering performance, testing and accessibility.',
     topics: ['react', 'hooks', 'components', 'performance', 'state-management', 'jsx', 'testing'],
-    icon: '⚛️',
+    icon: 'react',
     color: '#61DAFB',
     createdBy: 'maya-chen',
     createdDaysAgo: 190,
@@ -74,8 +75,8 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'Full-stack React with the App Router, Server Components, caching and route handlers. Discuss rendering strategies, deployment and production lessons.',
     topics: ['nextjs', 'react', 'app-router', 'server-components', 'caching', 'routing', 'api', 'performance'],
-    icon: '▲',
-    color: '#FFFFFF',
+    icon: 'nextdotjs',
+    color: '#8a8a8a',
     createdBy: 'priya-nair',
     createdDaysAgo: 185,
   },
@@ -85,7 +86,7 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'Modern PHP from language features and Composer packages to security, SQL and testing. Practical notes for writing maintainable server-side code.',
     topics: ['php', 'php-8', 'composer', 'psr', 'security', 'performance', 'testing', 'types'],
-    icon: '🐘',
+    icon: 'php',
     color: '#777BB4',
     createdBy: 'daniel-okafor',
     createdDaysAgo: 210,
@@ -96,7 +97,7 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'Eloquent, queues, APIs and Blade templates in the Laravel framework. Share tips for keeping large applications fast, tested and easy to operate.',
     topics: ['laravel', 'eloquent', 'queues', 'blade', 'api', 'testing', 'performance', 'php'],
-    icon: '🔺',
+    icon: 'laravel',
     color: '#FF2D20',
     createdBy: 'sofia-martins',
     createdDaysAgo: 200,
@@ -107,7 +108,7 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'The language and the platform around it: async patterns, browser APIs, Node.js and the testing tools that keep JavaScript code dependable.',
     topics: ['javascript', 'async', 'browser-apis', 'performance', 'node', 'testing', 'es2024'],
-    icon: '🟨',
+    icon: 'javascript',
     color: '#F7DF1E',
     createdBy: 'luca-moretti',
     createdDaysAgo: 205,
@@ -118,7 +119,7 @@ export const SEED_COMMUNITIES: readonly SeedCommunity[] = [
     description:
       'Typed JavaScript at scale: modeling state with unions, generics, runtime validation with Zod and the tooling that makes large codebases safer to change.',
     topics: ['typescript', 'types', 'generics', 'tooling', 'zod', 'testing', 'type-safety'],
-    icon: '🔷',
+    icon: 'typescript',
     color: '#3178C6',
     createdBy: 'luca-moretti',
     createdDaysAgo: 195,
