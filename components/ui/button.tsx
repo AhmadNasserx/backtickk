@@ -5,13 +5,15 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 // Touch targets grow to 44px below the sm breakpoint. Press feedback is a small scale-down.
+// translate and scale are listed because the lift and the press use those individual properties, not transform.
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium select-none cursor-pointer transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-colors motion-reduce:active:scale-100";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium select-none cursor-pointer transition-[color,background-color,border-color,box-shadow,transform,translate,scale] duration-200 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-colors motion-reduce:active:scale-100";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   // The glow is a box-shadow transition on hover; the inner highlight gives the lime a little depth.
+  // `shine` sweeps a light band across on hover; `group` lets icons inside nudge with group-hover.
   primary:
-    "bg-accent text-accent-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)] hover:bg-accent-hover hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35),0_8px_28px_-8px_color-mix(in_srgb,var(--color-accent)_70%,transparent)]",
+    "group shine bg-accent text-accent-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35)] hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.35),0_8px_28px_-8px_color-mix(in_srgb,var(--color-accent)_70%,transparent)] motion-reduce:hover:translate-y-0",
   secondary:
     "border border-line bg-surface-2 text-fg shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] hover:border-line-strong hover:bg-surface-3",
   ghost: "text-muted hover:bg-surface-2 hover:text-fg",
