@@ -17,16 +17,29 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight text-fg">Something went wrong</h1>
-      <p className="text-muted">
-        An unexpected error interrupted this page. Try again, or head back home.
+    <div className="relative isolate mx-auto flex min-h-[60dvh] w-full max-w-2xl flex-col justify-center gap-6 py-12">
+      <div
+        aria-hidden="true"
+        className="bg-glow pointer-events-none absolute -top-24 -right-24 -z-10 size-96"
+      />
+
+      <p className="eyebrow">Unexpected error</p>
+      <h1 className="font-display text-4xl leading-tight tracking-tight text-balance text-fg sm:text-5xl">
+        Something broke while loading this page.
+      </h1>
+      <p className="max-w-prose text-base leading-relaxed text-muted">
+        The error has been logged. Try again in a moment, or head back to the home page.
       </p>
       {error.digest ? (
         <p className="font-mono text-xs text-subtle">Reference: {error.digest}</p>
       ) : null}
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-        <button type="button" onClick={() => unstable_retry()} className={buttonClasses("primary", "md")}>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => unstable_retry()}
+          className={buttonClasses("primary", "md")}
+        >
           Try again
         </button>
         <Link href="/" className={buttonClasses("secondary", "md")}>

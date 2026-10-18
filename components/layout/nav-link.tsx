@@ -1,5 +1,5 @@
 "use client";
-// Client boundary: usePathname() is needed to mark the active link.
+// Client boundary: usePathname() is needed to set aria-current and pick the active styling for the current route.
 
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -11,10 +11,19 @@ export type NavLinkProps = {
   /** Match only the exact path (used for "/" so it is not active everywhere). */
   exact?: boolean;
   className?: string;
+  activeClassName?: string;
+  inactiveClassName?: string;
   children: ReactNode;
 };
 
-export function NavLink({ href, exact = false, className, children }: NavLinkProps) {
+export function NavLink({
+  href,
+  exact = false,
+  className,
+  activeClassName,
+  inactiveClassName,
+  children,
+}: NavLinkProps) {
   const pathname = usePathname();
   const active = exact
     ? pathname === href
@@ -24,13 +33,7 @@ export function NavLink({ href, exact = false, className, children }: NavLinkPro
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
-        active
-          ? "bg-surface-2 text-fg shadow-[inset_2px_0_0_0_var(--color-brand)]"
-          : "text-muted hover:bg-surface-2 hover:text-fg",
-        className,
-      )}
+      className={cn(className, active ? activeClassName : inactiveClassName)}
     >
       {children}
     </Link>
