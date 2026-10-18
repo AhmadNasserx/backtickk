@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  // Enables forbidden(): renders app/forbidden.tsx and returns HTTP 403.
+  experimental: {
+    authInterrupts: true,
+  },
   images: {
     // OAuth avatar hosts. Anything else must be rendered with unoptimized (see components/ui/avatar.tsx).
     remotePatterns: [

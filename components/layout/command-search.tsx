@@ -1,21 +1,11 @@
 "use client";
-// Client boundary: the / and Ctrl/⌘K shortcuts need window key listeners, and submitting needs the router.
+// Client boundary: the / and Ctrl/⌘K shortcuts need window key listeners, and the live results need client state.
 
-import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { SearchCombobox } from "@/components/layout/search-combobox";
 import { cn } from "@/lib/utils";
-import { blogSearchHref } from "@/data/navigation";
-import { SearchIcon } from "@/components/ui/icons";
-
-const INPUT_ID = "command-search";
-
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
-}
 
 export function CommandSearch({ className }: { className?: string }) {
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,39 +33,28 @@ export function CommandSearch({ className }: { className?: string }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const term = String(new FormData(event.currentTarget).get("search") ?? "");
-    router.push(blogSearchHref(term));
-  }
-
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Escape") event.currentTarget.blur();
-  }
-
   return (
-    <form role="search" onSubmit={onSubmit} className={cn("group relative min-w-0", className)}>
-      <label htmlFor={INPUT_ID} className="sr-only">
-        Search blog posts
-      </label>
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle transition-colors group-focus-within:text-accent" />
-      <input
-        ref={inputRef}
-        id={INPUT_ID}
-        name="search"
-        type="search"
-        placeholder="Search posts, tags, authors"
-        autoComplete="off"
-        aria-keyshortcuts="/ Control+K Meta+K"
-        onKeyDown={onKeyDown}
-        className="h-10 w-full rounded-xl border border-line bg-surface pr-14 pl-9 text-sm text-fg placeholder:text-subtle transition-colors hover:border-line-strong focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
-      />
-      <kbd
-        aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center rounded-md border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] leading-none text-subtle md:inline-flex"
-      >
-        ⌘K
-      </kbd>
-    </form>
+    <SearchCombobox
+      label="Search posts and communities"
+      placeholder="Search posts and communities"
+      inputRef={inputRef}
+      keyShortcuts="/ Control+K Meta+K"
+      formClassName={cn("group relative min-w-0", className)}
+      inputClassName="h-10 w-full rounded-xl border border-line bg-surface pr-14 pl-9 text-sm text-fg placeholder:text-subtle transition-colors hover:border-line-strong focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+      onEscape={() => inputRef.current?.blur()}
+      trailing={
+        <kbd
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center rounded-md border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] leading-none text-subtle md:inline-flex"
+        >
+          ⌘K
+        </kbd>
+      }
+    />
   );
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 }

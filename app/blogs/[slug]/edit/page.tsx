@@ -1,10 +1,7 @@
 // Dynamic: depends on the signed-in user. Only the post's author or an admin may edit it.
 import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { forbidden, notFound } from "next/navigation";
 import { PostForm } from "@/components/forms/post-form";
-import { buttonClasses } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
 import { requireUserOrRedirect } from "@/lib/auth-helpers";
 import { listUserCommunities } from "@/lib/data/communities";
 import { getPostBySlug } from "@/lib/data/posts";
@@ -23,20 +20,9 @@ export default async function EditPostPage({ params }: { params: Promise<{ slug:
   }
 
   // The PATCH API enforces the same rule; this check only decides what the page shows.
+  // forbidden() renders app/forbidden.tsx and responds with HTTP 403.
   if (post.author.id !== user.id && user.role !== "admin") {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <EmptyState
-          title="You can't edit this post"
-          description="Error 403: only the author and site admins can edit this post."
-          action={
-            <Link href={`/blogs/${post.slug}`} className={buttonClasses("secondary", "md")}>
-              Back to the post
-            </Link>
-          }
-        />
-      </div>
-    );
+    forbidden();
   }
 
   // Keeps the post's current community selectable even if the author has since left it.
