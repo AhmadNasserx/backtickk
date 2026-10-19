@@ -1,6 +1,6 @@
 # Tests
 
-Automated tests for Backtick's critical business rules: post authorization and drafts, membership counts,
+Automated tests for Backtickk's critical business rules: post authorization and drafts, membership counts,
 bookmarks and comments, query and input validation, and user sign-in and profile rules.
 
 ## Running

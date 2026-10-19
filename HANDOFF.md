@@ -1,4 +1,4 @@
-# Handoff: finish deployment of Backtick
+# Handoff: finish deployment of Backtickk
 
 This file lets a new local Claude Code session pick up exactly where the cloud session stopped. Read it fully, then follow "Start here". The product is built, tested and documented. What remains is **deployment and real OAuth**, which need the owner's accounts and secrets and therefore must happen locally.
 
@@ -6,10 +6,10 @@ This file lets a new local Claude Code session pick up exactly where the cloud s
 
 | Item | State |
 |---|---|
-| Repository | `AhmadNasserx/techtalks-assignment-1-ahmad-nasser` |
+| Repository | `AhmadNasserx/backtickk` |
 | **Branch to pull** | **`main`**. It contains the whole project: pull request #2 (`feature/devcommunity-capstone`) was merged into it with a merge commit, so the individual commits are preserved. |
 | Branches to ignore | `feature/devcommunity-capstone` (merged, kept only for reference), `ccr-1d9328e3-kng7qp` (a cloud session branch), `assignment-01-ahmad-nasser` (the owner's own earlier branch) |
-| App name | **Backtick** (previously DevCommunity; the repo and package name keep the old slug) |
+| App name | **Backtickk** (previously DevCommunity, then Backtick; the package.json name is unchanged) |
 | Stack | Next.js 16.2 (App Router), React 19, TypeScript, Tailwind v4, MongoDB + Mongoose 9, Auth.js v5 (`next-auth@beta`), Zod 4, Vitest |
 | Quality gates last run | lint clean, `tsc` clean, 171 tests pass, production build passes, no horizontal overflow on 18 pages at 360/390/768/1360px, Lighthouse accessibility 100 and performance about 91 to 94 on main pages (local, simulated mobile) |
 | Not done | Vercel deployment, Atlas production database, real GitHub and Google OAuth, README live URL |
@@ -20,8 +20,8 @@ The owner is setting up MongoDB Atlas by hand (not through the Vercel Marketplac
 ## Start here
 
 ```bash
-git clone https://github.com/AhmadNasserx/techtalks-assignment-1-ahmad-nasser.git
-cd techtalks-assignment-1-ahmad-nasser
+git clone https://github.com/AhmadNasserx/backtickk.git
+cd backtickk
 git checkout main
 git pull origin main                                # main holds everything; confirm with: git log --oneline | head
 git checkout -b feature/deployment                  # CLAUDE.md forbids working on main: use a branch for any repo change

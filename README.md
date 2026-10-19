@@ -1,8 +1,8 @@
-# Backtick
+# Backtickk
 
 _Where developers write in the open._
 
-Backtick is a web app for developer communities. Visitors can browse communities built around technologies such as React, Next.js, PHP, Laravel, JavaScript and TypeScript, read technical posts written by members, and search and filter posts by community, topic and author. Community pages list their members. Signed-in users join communities, publish Markdown posts in the communities they belong to, bookmark posts, comment, and manage their profile and their own posts from a dashboard. Sign-in uses GitHub or Google through Auth.js, so the app stores no passwords.
+Backtickk is a web app for developer communities. Visitors can browse communities built around technologies such as React, Next.js, PHP, Laravel, JavaScript and TypeScript, read technical posts written by members, and search and filter posts by community, topic and author. Community pages list their members. Signed-in users join communities, publish Markdown posts in the communities they belong to, bookmark posts, comment, and manage their profile and their own posts from a dashboard. Sign-in uses GitHub or Google through Auth.js, so the app stores no passwords.
 
 Live demo: https://backtickk.vercel.app
 

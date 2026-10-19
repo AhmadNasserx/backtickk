@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-5 font-mono text-xs text-subtle sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <Wordmark />
-              <p>© {new Date().getFullYear()} Backtick</p>
+              <p>© {new Date().getFullYear()} Backtickk</p>
             </div>
             <Link
               href="/about"

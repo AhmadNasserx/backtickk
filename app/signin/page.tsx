@@ -102,7 +102,7 @@ export default async function SignInPage({ searchParams }: { searchParams: SignI
           </div>
 
           <div className="min-w-0 rounded-2xl border border-line bg-bg/80 p-6 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] backdrop-blur sm:p-8">
-            <h2 className="font-display text-3xl tracking-tight text-fg">Sign in to Backtick</h2>
+            <h2 className="font-display text-3xl tracking-tight text-fg">Sign in to Backtickk</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               Use the GitHub or Google account you already have. No password is needed.
             </p>
