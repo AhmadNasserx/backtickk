@@ -7,9 +7,8 @@ This file lets a new local Claude Code session pick up exactly where the cloud s
 | Item | State |
 |---|---|
 | Repository | `AhmadNasserx/techtalks-assignment-1-ahmad-nasser` |
-| Work branch | `feature/devcommunity-capstone` (28 commits ahead of `main`, working tree clean, pushed) |
-| Pull request | #2 `feature/devcommunity-capstone` into `main` (open when this was written; check with `gh pr view 2` or on GitHub) |
-| Other remote branches | `main` (only the initial create-next-app commit), `assignment-01-ahmad-nasser` (the owner's own), `ccr-1d9328e3-kng7qp` (a cloud session branch, can be ignored) |
+| **Branch to pull** | **`main`**. It contains the whole project: pull request #2 (`feature/devcommunity-capstone`) was merged into it with a merge commit, so the individual commits are preserved. |
+| Branches to ignore | `feature/devcommunity-capstone` (merged, kept only for reference), `ccr-1d9328e3-kng7qp` (a cloud session branch), `assignment-01-ahmad-nasser` (the owner's own earlier branch) |
 | App name | **Backtick** (previously DevCommunity; the repo and package name keep the old slug) |
 | Stack | Next.js 16.2 (App Router), React 19, TypeScript, Tailwind v4, MongoDB + Mongoose 9, Auth.js v5 (`next-auth@beta`), Zod 4, Vitest |
 | Quality gates last run | lint clean, `tsc` clean, 171 tests pass, production build passes, no horizontal overflow on 18 pages at 360/390/768/1360px, Lighthouse accessibility 100 and performance about 91 to 94 on main pages (local, simulated mobile) |
@@ -23,9 +22,10 @@ The owner is setting up MongoDB Atlas by hand (not through the Vercel Marketplac
 ```bash
 git clone https://github.com/AhmadNasserx/techtalks-assignment-1-ahmad-nasser.git
 cd techtalks-assignment-1-ahmad-nasser
-git fetch origin
-git checkout feature/devcommunity-capstone
-git config user.name && git config user.email   # must be the owner's identity before any commit
+git checkout main
+git pull origin main                                # main holds everything; confirm with: git log --oneline | head
+git checkout -b feature/deployment                  # CLAUDE.md forbids working on main: use a branch for any repo change
+git config user.name && git config user.email      # must be the owner's identity before any commit
 npm install
 cp .env.example .env.local                        # then fill values locally, never commit them
 npm run lint && npx tsc --noEmit && npm test && npm run build
@@ -66,11 +66,11 @@ Create separate apps for local and production, because GitHub OAuth apps accept 
 
 ### 3. Deploy to Vercel
 1. Vercel, Add New, Project, import the GitHub repo. Next.js is auto-detected, so keep the default build settings.
-2. Decide the branch: either merge PR #2 into `main` first (recommended, the brief says `main` holds the deployed version) or deploy the feature branch as a preview and promote later.
+2. Branch: deploy **`main`** (PR #2 is already merged into it). Make sure Vercel's Production Branch is `main`.
 3. Settings, Environment Variables: add every variable from the table above for Production (and Preview if you want preview deployments to work). Without `MONGODB_URI` the **build fails**, because the home page pre-renders against the database.
 4. Deploy and read the build log. Fix errors rather than assuming localhost behavior carries over.
 5. After the first deploy you know the production domain: set `AUTH_URL`, update the GitHub and Google redirect URIs to that domain, and **redeploy** (environment variable changes only apply to new deployments).
-6. Put the live URL into the README placeholder line `Live demo: _add your Vercel URL here after deploying_`, commit it on a branch and push.
+6. Put the live URL into the README placeholder line `Live demo: _add your Vercel URL here after deploying_`. Do this on the `feature/deployment` branch, push it and open a small pull request into `main`.
 
 ### 4. Production verification checklist
 This mirrors the submission checklist in the capstone brief. Check each item on the live URL and report failures honestly.
@@ -88,7 +88,7 @@ This mirrors the submission checklist in the capstone brief. Check each item on 
 - [ ] README lists the live URL, environment variable names and deployment steps.
 
 ### 5. Finish the repository
-Merge PR #2 after review, keep commits small and unattributed (see `CLAUDE.md`), and make sure the final state is on `main` before submission.
+PR #2 is already merged. For anything further (the live URL in the README, fixes found during deployment) use the `feature/deployment` branch with small, unattributed commits (see `CLAUDE.md`), open a pull request into `main`, and make sure the final state is on `main` before submission.
 
 ## Gotchas learned in this project
 
@@ -105,7 +105,7 @@ Merge PR #2 after review, keep commits small and unattributed (see `CLAUDE.md`),
 
 Paste this as the first message:
 
-> Read `HANDOFF.md`, `CLAUDE.md`, `AGENTS.md` and `README.md` in this repository, and follow the working agreement in `CLAUDE.md`. You are on branch `feature/devcommunity-capstone`. First run the quality gates (lint, tsc, tests, build) and tell me the result. Then walk me through the remaining tasks in `HANDOFF.md` one at a time: finishing Atlas, creating the GitHub and Google OAuth apps, deploying to Vercel, and the production verification checklist. I have already created an Atlas cluster and a database user. Ask me for anything you need, but never ask me to paste secrets into the chat; I will put them in `.env.local` and in the Vercel dashboard myself. Add no attribution to commits or PRs.
+> First make sure you are on the right branch: run `git checkout main && git pull origin main`, then create a working branch with `git checkout -b feature/deployment` (never commit to `main` directly). Then read `HANDOFF.md`, `CLAUDE.md`, `AGENTS.md` and `README.md` in this repository, and follow the working agreement in `CLAUDE.md`. Run the quality gates (lint, tsc, tests, build) and tell me the result. Then walk me through the remaining tasks in `HANDOFF.md` one at a time: finishing Atlas, creating the GitHub and Google OAuth apps, deploying to Vercel, and the production verification checklist. I have already created an Atlas cluster and a database user. Ask me for anything you need, but never ask me to paste secrets into the chat; I will put them in `.env.local` and in the Vercel dashboard myself. Add no attribution to commits or PRs.
 
 ## What does not travel with the repo
 
