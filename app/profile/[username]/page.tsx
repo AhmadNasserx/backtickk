@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   }
   return {
     title: `${profile.name} (@${profile.username})`,
-    description: profile.bio || `Profile of @${profile.username} on Backtick.`,
+    description: profile.bio || `Profile of @${profile.username} on Backtickk.`,
   };
 }
 

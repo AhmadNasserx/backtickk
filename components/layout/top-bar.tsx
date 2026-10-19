@@ -18,7 +18,7 @@ export function TopBar() {
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          aria-label="Backtick home"
+          aria-label="Backtickk home"
           className="flex shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         >
           <Wordmark />

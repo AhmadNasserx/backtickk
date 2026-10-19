@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "What Backtick is for and the guidelines everyone on the platform follows.",
+  description: "What Backtickk is for and the guidelines everyone on the platform follows.",
 };
 
 const HOW_IT_WORKS = [
@@ -73,7 +73,7 @@ export default function AboutPage() {
           A home for developers who <em className="italic text-accent">build</em> in the open.
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-muted">
-          Backtick brings developers together around shared interests. Join a community, read
+          Backtickk brings developers together around shared interests. Join a community, read
           technical posts written by people who build software, and share what you have learned.
         </p>
       </header>

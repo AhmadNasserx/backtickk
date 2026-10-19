@@ -69,7 +69,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Set
               className="flex min-w-0 flex-col gap-1.5 rounded-2xl border border-accent/30 bg-accent-soft p-5 sm:p-6"
             >
               <p className="font-display text-2xl leading-tight text-fg text-balance">
-                Welcome to Backtick — tell people who you are
+                Welcome to Backtickk — tell people who you are
               </p>
               <p className="text-sm text-muted">A short bio and a few skills help other developers find and trust your writing.</p>
             </div>

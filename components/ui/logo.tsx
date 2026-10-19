@@ -38,7 +38,7 @@ export function Wordmark({ className }: { className?: string }) {
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
       <span className="font-display text-[22px] leading-none tracking-[-0.02em] text-fg">
-        backtick
+        backtickk
         <span
           aria-hidden="true"
           className="ml-1 inline-block size-1.5 rounded-full bg-accent"
