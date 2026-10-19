@@ -1,26 +1,883 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * "Ink & Lime" design tokens. Dark-only; every color utility (bg-surface, border-line, text-muted,
+ * bg-accent-soft, text-danger/80 ...) is generated from these.
+ */
+@theme {
+  --color-bg: #0a0a0b;
+  --color-surface: #111113;
+  --color-surface-2: #17171a;
+  --color-surface-3: #1e1e22;
+  --color-line: #26262b;
+  --color-line-strong: #3a3a42;
+  --color-fg: #f3f2ee;
+  --color-muted: #a3a3ab;
+  --color-subtle: #8d8d96;
+  --color-accent: #c8ff3d;
+  --color-accent-hover: #d8ff6b;
+  --color-accent-fg: #0a0a0b;
+  --color-accent-soft: color-mix(in srgb, #c8ff3d 12%, transparent);
+  --color-success: #4ade80;
+  --color-danger: #ff5d5d;
+  --color-warning: #ffb020;
+  --color-info: #7dd3fc;
+
+  /* Transitional aliases so not-yet-migrated markup keeps rendering. Remove once nothing uses them. */
+  --color-brand: #c8ff3d;
+  --color-brand-hover: #d8ff6b;
 }
 
+/*
+ * Font variables are set by next/font on <html> (see app/layout.tsx). They are named differently from
+ * the utility tokens on purpose: a variable named --font-sans cannot be mapped to itself.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: var(--color-bg);
+    scroll-padding-top: 4rem;
+    scroll-behavior: smooth;
+    scrollbar-color: var(--color-line-strong) var(--color-bg);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+
+  :where(a, button, input, select, textarea, label) {
+    transition-property: color, background-color, border-color, outline-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    :where(a, button, input, select, textarea, label) {
+      transition: none;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Never starts fully hidden: the content is painted from the first frame and only settles up to full opacity. */
+@keyframes dc-reveal {
+  from {
+    opacity: 0.45;
+    transform: translateY(0.18em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dc-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes dc-scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@layer components {
+  /* ---- Decorative backgrounds (use on an aria-hidden, pointer-events-none layer) ---- */
+
+  .bg-dots {
+    background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-glow {
+    pointer-events: none;
+    background-image: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-accent) 22%, transparent),
+      transparent
+    );
+  }
+
+  /* Noise is an inline SVG whose alpha is ~4% (feTurbulence red channel scaled into alpha). */
+  .bg-noise {
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.08 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Cards ---- */
+
+  /* Hover lift + lime beam along the top edge. Transform and opacity only; no layout work. */
+  .card-hover {
+    position: relative;
+    /* Own stacking context, so the spotlight below can sit at z -1: above the card surface, under its content. */
+    isolation: isolate;
+    transition-property: border-color, transform;
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .card-hover::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 1.25rem;
+    right: 1.25rem;
+    height: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+  }
+
+  /* Cursor spotlight. spotlight.tsx writes --mx/--my (px, relative to the card); 50% 50% until the first move. */
+  .card-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle 220px at var(--mx, 50%) var(--my, 50%),
+      rgb(200 255 61 / 0.08),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .card-hover:hover {
+      border-color: var(--color-line-strong);
+      transform: translateY(-2px);
+    }
+
+    .card-hover:hover::before,
+    .card-hover:hover::after {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-hover,
+    .card-hover::before,
+    .card-hover::after {
+      transition: none;
+    }
+
+    .card-hover:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Typography atoms ---- */
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+  }
+
+  /* Mono #tag chip. Add the leading "#" in markup. */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    color: var(--color-muted);
+    /* Short tags stay on one line; a long one (up to 30 characters) wraps inside its chip instead of forcing the row wider. */
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  @media (hover: hover) {
+    .tag:hover {
+      color: var(--color-accent);
+      background-color: var(--color-accent-soft);
+      border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    }
+  }
+
+  /* ---- Motion ---- */
+
+  /* Staggered entrance: set style="--i: 0", "--i: 1" ... on siblings. Backwards fill only, so the element ends in its
+   * natural style and is never hidden for longer than the 160 ms stagger. */
+  .reveal {
+    animation: dc-reveal 450ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+    }
+  }
+
+  /* Shimmer skeleton. Moves a pseudo-element with transform; the background never repaints. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-surface-2);
+    isolation: isolate;
+  }
+
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-fg) 7%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+    will-change: transform;
+    animation: dc-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+      display: none;
+    }
+  }
+
+  /* Reading progress bar, driven by scroll position. Falls back to no bar where unsupported. */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: dc-scroll-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  /* ---- Layout helpers ---- */
+
+  /* Keeps fixed bottom bars clear of the iOS home indicator. */
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
+  /* Skips rendering off-screen content in long lists. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
+  /* ---- Article typography (rendered markdown) ---- */
+
+  .prose-dev {
+    color: var(--color-fg);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    overflow-wrap: break-word;
+  }
+
+  @media (min-width: 40rem) {
+    .prose-dev {
+      font-size: 1.125rem;
+    }
+  }
+
+  .prose-dev > * + * {
+    margin-top: 1.25em;
+  }
+
+  .prose-dev > :first-child {
+    margin-top: 0;
+  }
+
+  .prose-dev h1,
+  .prose-dev h2,
+  .prose-dev h3,
+  .prose-dev h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-fg);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-top: 2.1em;
+    margin-bottom: 0.6em;
+    scroll-margin-top: 5rem;
+  }
+
+  .prose-dev h1 {
+    font-size: 2.25rem;
+  }
+
+  .prose-dev h2 {
+    font-size: 1.875rem;
+  }
+
+  .prose-dev h3 {
+    font-size: 1.5rem;
+  }
+
+  .prose-dev h4 {
+    font-size: 1.25rem;
+  }
+
+  .prose-dev p {
+    margin: 0;
+  }
+
+  .prose-dev strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .prose-dev em {
+    font-style: italic;
+  }
+
+  .prose-dev a {
+    color: var(--color-accent);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: text-decoration-color 150ms ease;
+  }
+
+  .prose-dev a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .prose-dev ul,
+  .prose-dev ol {
+    padding-left: 1.5em;
+  }
+
+  .prose-dev ul {
+    list-style: disc;
+  }
+
+  .prose-dev ol {
+    list-style: decimal;
+  }
+
+  .prose-dev ul ul {
+    list-style: circle;
+  }
+
+  .prose-dev li + li {
+    margin-top: 0.4em;
+  }
+
+  .prose-dev li::marker {
+    color: var(--color-subtle);
+  }
+
+  .prose-dev :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    color: var(--color-fg);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-line);
+    border-radius: 0.375rem;
+    padding: 0.1em 0.35em;
+    overflow-wrap: anywhere;
+  }
+
+  .prose-dev pre {
+    max-width: 100%;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    padding: 1rem 1.125rem;
+    scrollbar-width: thin;
+  }
+
+  .prose-dev pre code {
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .prose-dev blockquote {
+    border-left: 3px solid var(--color-accent);
+    padding: 0.25em 0 0.25em 1.125rem;
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25em;
+    line-height: 1.5;
+  }
+
+  .prose-dev table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.9375em;
+  }
+
+  .prose-dev th,
+  .prose-dev td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .prose-dev th {
+    font-weight: 600;
+    background-color: var(--color-surface-2);
+  }
+
+  .prose-dev img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+  }
+
+  .prose-dev hr {
+    border: 0;
+    border-top: 1px solid var(--color-line);
+    margin: 2.5em 0;
+  }
+}
+
+/* ==========================================================================
+ * MOTION LAYER
+ * CSS only. Animates transform and opacity, so it stays on the compositor. Gradients replace filter: blur.
+ * Entrance motion sits behind prefers-reduced-motion: no-preference, and scroll reveals also behind
+ * @supports (animation-timeline: view()). Without either, content renders statically and fully visible.
+ * ========================================================================== */
+
+/* Registered so the border beam's gradient angle can be interpolated. */
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes dc-aurora {
+  from {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 5%, 0) scale(1.12);
+  }
+}
+
+/* Words start visible (dimmed, 0.18em low) and settle in place. Nothing is ever clipped or moved off the line. */
+@keyframes dc-word-up {
+  from {
+    opacity: 0.45;
+    transform: translateY(0.18em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dc-draw-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dc-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes dc-beam {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+@keyframes dc-scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dc-marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Route entrance: the first frame is already mostly painted, so LCP never waits on this fade. */
+@keyframes dc-page-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes dc-shine {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@layer components {
+  /* ---- Hero aurora: two soft radial blobs that drift. Size and position come from the markup. ---- */
+
+  .aurora {
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side,
+      var(--aurora-tint, color-mix(in srgb, var(--color-accent) 24%, transparent)),
+      transparent
+    );
+  }
+
+  .aurora-teal {
+    --aurora-tint: rgb(45 212 191 / 0.16);
+  }
+
+  /* ---- Word-by-word headline reveal. Each word is an inline-block with no clipping mask: fully painted in the first frame. ---- */
+
+  .word-reveal {
+    display: inline-block;
+  }
+
+  .word-reveal > span {
+    display: inline-block;
+  }
+
+  /* Underline for the italic keyword, drawn left to right with scaleX. inline-block gives it one box to span, even if the line wraps. */
+  .underline-draw {
+    position: relative;
+    display: inline-block;
+  }
+
+  .underline-draw::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    border-radius: 9999px;
+    background-color: var(--color-accent);
+    transform-origin: left center;
+  }
+
+  /* Blinking terminal caret. */
+  .caret {
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 0.25em;
+    vertical-align: -0.14em;
+    background-color: var(--color-accent);
+  }
+
+  /* ---- Logo marquee. Two identical sets; the second is aria-hidden and the loop moves one set width. ---- */
+
+  .tech-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .tech-marquee-track {
+    display: flex;
+    width: max-content;
+  }
+
+  .tech-marquee-set {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 3rem;
+    padding-right: 3rem;
+  }
+
+  /* ---- Border beam. Used on the home join band and the featured community card wrapper only. ---- */
+
+  .beam {
+    position: relative;
+  }
+
+  /* A 1px conic ring masked to the border. Without @property the angle stays at 0deg: a static line-strong ring with one accent arc. */
+  .beam::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Above the positioned card inside, which would otherwise paint over the ring. The ring is 1px and inert. */
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--beam-angle, 0deg),
+      var(--color-line-strong) 0deg 260deg,
+      var(--color-accent) 320deg,
+      var(--color-line-strong) 360deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+
+  /* The wrapper owns the position, so the beam ring does not drift off a card that lifts on hover. */
+  .beam > .card-hover:hover {
+    transform: none;
+  }
+
+  /* ---- Primary button shine: a light sweep across the face on hover. ---- */
+
+  .shine {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%);
+    transform: translateX(-100%);
+  }
+
+  /* ---- Route entrance: applied by app/template.tsx. Fill backwards, so no transform stays on the page. ---- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .aurora {
+      will-change: transform;
+      animation: dc-aurora 22s ease-in-out infinite alternate;
+    }
+
+    /* Declared after .aurora so its duration and phase win. */
+    .aurora-teal {
+      animation-duration: 28s;
+      animation-delay: -9s;
+    }
+
+    .word-reveal > span {
+      animation: dc-word-up 450ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+      animation-delay: calc(var(--i, 0) * 40ms);
+    }
+
+    .underline-draw::after {
+      transform: scaleX(0);
+      animation: dc-draw-x 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 700ms both;
+    }
+
+    .caret {
+      animation: dc-blink 1.1s step-end infinite;
+    }
+
+    .tech-marquee-track {
+      will-change: transform;
+      animation: dc-marquee 45s linear infinite;
+    }
+
+    .tech-marquee:hover .tech-marquee-track,
+    .tech-marquee:focus-within .tech-marquee-track {
+      animation-play-state: paused;
+    }
+
+    .beam::before {
+      animation: dc-beam 6s linear infinite;
+    }
+
+    .shine:hover::after {
+      animation: dc-shine 600ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    }
+
+    .page-in {
+      animation: dc-page-in 200ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    }
+  }
+
+  /* ---- Scroll-driven reveals. [data-reveal] fades and lifts in as it enters; [data-reveal-stagger] children
+   * start a little later each, using --i (set per child below). Backwards fill: after the range the element
+   * returns to its normal style, so hover transforms on cards still work. ---- */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      [data-reveal],
+      [data-reveal-stagger] > * {
+        animation: dc-scroll-reveal linear backwards;
+        animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+        animation-timeline: view();
+        animation-range: entry calc(var(--i, 0) * 6%) entry calc(var(--i, 0) * 6% + 40%);
+      }
+
+      [data-reveal-stagger] > :nth-child(2) {
+        --i: 1;
+      }
+      [data-reveal-stagger] > :nth-child(3) {
+        --i: 2;
+      }
+      [data-reveal-stagger] > :nth-child(4) {
+        --i: 3;
+      }
+      [data-reveal-stagger] > :nth-child(5) {
+        --i: 4;
+      }
+      [data-reveal-stagger] > :nth-child(6) {
+        --i: 5;
+      }
+      [data-reveal-stagger] > :nth-child(7) {
+        --i: 6;
+      }
+      [data-reveal-stagger] > :nth-child(8) {
+        --i: 7;
+      }
+      [data-reveal-stagger] > :nth-child(9) {
+        --i: 8;
+      }
+      [data-reveal-stagger] > :nth-child(10) {
+        --i: 9;
+      }
+      [data-reveal-stagger] > :nth-child(n + 11) {
+        --i: 10;
+      }
+    }
+  }
+
+  /* ---- Safety net: every animation added above is neutralised, and the static layouts are restored. ---- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora,
+    .word-reveal > span,
+    .underline-draw::after,
+    .caret,
+    .tech-marquee-track,
+    .beam::before,
+    .shine::after,
+    .page-in {
+      animation: none !important;
+    }
+
+    /* Logos wrap into a static, centred grid. The duplicate set is removed from the layout. */
+    .tech-marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    .tech-marquee-track {
+      width: 100%;
+    }
+
+    .tech-marquee-set {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-right: 0;
+      row-gap: 1rem;
+    }
+
+    .tech-marquee-set[aria-hidden="true"] {
+      display: none;
+    }
+
+    .card-hover::after,
+    .beam::before {
+      transition: none;
+    }
+  }
 }
